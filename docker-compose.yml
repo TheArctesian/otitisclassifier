@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  streamlit-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: image-classifier-app
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./src:/app/src
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1

@@ -1,0 +1,38 @@
+# Large model files
+*.keras
+*.h5
+*.zip
+
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Dataset directories
+
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
