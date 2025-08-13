@@ -5,6 +5,18 @@ import json
 import time
 from datetime import datetime
 from PIL import Image
+
+# Define resampling constants with cross-version compatibility
+try:
+    # Modern PIL/Pillow (10.0.0+)
+    from PIL.Image import Resampling
+    LANCZOS = Resampling.LANCZOS
+    BICUBIC = Resampling.BICUBIC
+except (ImportError, AttributeError):
+    # Fallback: use integer constants directly
+    # These are the actual values used by PIL internally
+    LANCZOS = 1  # Image.LANCZOS constant value
+    BICUBIC = 3  # Image.BICUBIC constant value
 import numpy as np
 import cv2
 
@@ -37,12 +49,8 @@ def convert_and_standardize(image_path, save_path, analyze_colors=False):
             logging.debug(f"Processing {image_path}: {im.format}, {im.mode}, {im.size}")
             
             im = im.convert('RGB')
-            # Use LANCZOS resampling with compatibility for different PIL versions
-            try:
-                im = im.resize(target_size, Image.Resampling.LANCZOS)
-            except AttributeError:
-                # Fallback for older PIL versions
-                im = im.resize(target_size, Image.LANCZOS)
+            # Use LANCZOS resampling with cross-version compatibility
+            im = im.resize(target_size, LANCZOS)
             img_array = np.array(im).astype(np.uint8)
         
         # Validate image array

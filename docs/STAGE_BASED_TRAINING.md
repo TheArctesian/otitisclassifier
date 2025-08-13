@@ -1,178 +1,213 @@
-# Stage-Based Training Guide
+# Enhanced Dual Architecture Stage-Based Training Guide
 
 ## Overview
 
-This document outlines the stage-based training strategy for medical AI that ensures strict data isolation and FDA-compliant validation. The methodology follows medical AI best practices with progressive domain adaptation across 3 validated datasets.
+This document outlines the enhanced stage-based training strategy for dual architecture medical AI that ensures strict data isolation and FDA-compliant validation. The methodology follows medical AI best practices with **parallel hierarchical classification** using binary screening and multi-class diagnostic models across 3 validated datasets.
 
-## Stage-Based Dataset Architecture
+## Enhanced Dual Architecture Framework
 
-### Training Stages
-1. **Stage 1: Base Training** - Ebasaran-Kaggle (956 images) - Foundation model training
-2. **Stage 2: Fine-Tuning** - UCI-Kaggle (~900+ images) - Domain adaptation
-3. **Stage 3: External Validation** - VanAk-Figshare (~270+ images) - Unbiased evaluation
-4. **Clinical Annotations** - Sumotosima-GitHub (38+ cases) - Interpretability validation
+### **Binary Screening Model (Stage 1)**
+- **Purpose**: High-sensitivity pathology detection (Normal vs Pathological)
+- **Target Performance**: 98%+ sensitivity, 90%+ specificity
+- **Training Data**: Complete dataset (2,000+ images from all sources)
+- **Clinical Role**: Initial screening to catch all potential pathologies
 
-### Stage Isolation Principles
+### **Multi-Class Diagnostic Model (Stage 2)**
+- **Purpose**: Specific pathology identification among 8 pathological classes
+- **Target Performance**: 85%+ balanced accuracy, 80%+ sensitivity for rare classes
+- **Training Data**: Pathological cases only with aggressive augmentation
+- **Clinical Role**: Detailed diagnosis after positive screening
 
-| Stage | Dataset | Usage | Data Split | Isolation Level |
-|-------|---------|-------|------------|----------------|
-| Stage 1 | Ebasaran-Kaggle | Base Training | 80% train, 20% val | Internal split only |
-| Stage 2 | UCI-Kaggle | Fine-Tuning | 90% train, 10% val | No overlap with Stage 1 |
-| Stage 3 | VanAk-Figshare | External Test | 100% test | Never used for training |
-| Clinical | Sumotosima-GitHub | Validation | Expert comparison | Interpretability only |
+## Enhanced Stage-Based Dataset Architecture
 
-## Stage-Based Training Strategy
+### Enhanced Training Stages for Dual Architecture
+1. **Stage 1: Parallel Foundation Training** - Ebasaran-Kaggle (956 images) - Both models foundational training
+2. **Stage 2: Cross-Dataset Fine-Tuning** - UCI-Kaggle (~900+ images) - Domain adaptation for both models
+3. **Stage 3: External Validation** - VanAk-Figshare (~270+ images) - Unbiased evaluation of dual architecture
+4. **Clinical Interpretability** - Sumotosima-GitHub (38+ cases) - Dual model interpretability validation
 
-### Phase 1: Data Isolation Setup
-- Validate strict separation between training stages
-- Apply consistent CLAHE preprocessing across all formats
-- Preserve full resolution at 500×500 pixels for medical detail
-- Convert all images to unified PNG format for quality preservation
-- Implement contamination detection to prevent data leakage
+### Enhanced Stage Isolation Principles for Dual Architecture
 
-### Phase 2: Class Mapping and Standardization
-- Map dataset-specific class names to unified 9-class taxonomy
-- Handle naming variations and synonyms across datasets
-- Validate mapping completeness and accuracy
-- Document class correspondence for reproducibility
+| Stage | Dataset | Dual Model Usage | Data Split | Isolation Level |
+|-------|---------|------------------|------------|----------------|
+| Stage 1 | Ebasaran-Kaggle | Binary + Diagnostic Foundation | 80% train, 20% val | Internal split for both models |
+| Stage 2 | UCI-Kaggle | Cross-Dataset Fine-Tuning | 90% train, 10% val | No overlap, both models |
+| Stage 3 | VanAk-Figshare | External Validation | 100% test | Never used for training, both models |
+| Clinical | Sumotosima-GitHub | Dual Model Interpretability | Expert comparison | Dual model explanation validation |
 
-### Phase 3: Source-Aware Data Splitting
-- **Training Set**: Ebasaran-Kaggle + UCI-Kaggle (stratified combination)
-- **Validation Set**: Hold-out portion from training datasets (20%)
-- **External Test Set**: VanAk-Figshare (completely separate source)
-- **Clinical Validation**: Sumotosima annotations for interpretation checking
+## Enhanced Dual Architecture Training Strategy
 
-### Phase 4: Quality Assurance and Validation
-- Cross-dataset duplicate detection using perceptual hashing
-- Image quality validation and outlier detection
-- Class distribution analysis and imbalance assessment
-- Processing pipeline validation and benchmarking
+### Phase 1: Enhanced Data Isolation Setup for Dual Models
+- **Dual Model Data Routing**: Separate data preparation for binary screening (all data) vs multi-class diagnostic (pathological only)
+- **Enhanced Quality Control**: Medical-grade CLAHE preprocessing optimized for both models
+- **Multi-Scale Processing**: Preserve full resolution at 500×500 pixels with scale variants for dual architecture
+- **Enhanced Format Standardization**: Convert all images to unified PNG format optimized for dual model training
+- **Contamination Detection**: Implement dual model contamination detection to prevent data leakage
 
-## Technical Implementation
+### Phase 2: Enhanced Class Mapping and Dual Architecture Standardization
+- **Binary Classification Mapping**: Normal vs Pathological categories for screening model
+- **Multi-Class Pathology Mapping**: 8 pathological conditions for diagnostic model
+- **Cross-Dataset Consistency**: Handle naming variations across datasets for both models
+- **Dual Model Validation**: Validate mapping completeness for both binary and multi-class scenarios
+- **Enhanced Documentation**: Document class correspondence for dual architecture reproducibility
 
-### Configuration Management
-- Use Hydra framework for hierarchical configuration management
-- YAML-based configuration files for reproducibility
-- Environment-specific overrides for development/production
+### Phase 3: Enhanced Source-Aware Data Splitting for Dual Architecture
+- **Binary Screening Training Set**: Ebasaran-Kaggle + UCI-Kaggle (complete stratified combination)
+- **Multi-Class Diagnostic Training Set**: Pathological cases only from combined datasets
+- **Enhanced Validation Set**: Hold-out portion from training datasets for both models (20%)
+- **External Test Set**: VanAk-Figshare (completely separate source) for dual architecture validation
+- **Clinical Validation**: Sumotosima annotations for dual model interpretation checking
 
-### Data Processing Pipeline
-```
-Raw Datasets → Format Validation → Preprocessing → Class Mapping → Quality Validation → Unified Dataset
-```
+### Phase 4: Enhanced Quality Assurance and Dual Architecture Validation
+- **Cross-Dataset Duplicate Detection**: Enhanced perceptual hashing for dual model datasets
+- **Dual Model Quality Validation**: Image quality validation optimized for both screening and diagnostic models
+- **Enhanced Class Distribution Analysis**: Imbalance assessment for both binary and multi-class scenarios
+- **Dual Architecture Pipeline Validation**: Processing pipeline validation and benchmarking for both models
 
-### Processing Scripts
-- `scripts/process_all_datasets.py` - Main processing pipeline
-- `scripts/create_combined_dataset.py` - Dataset combination and splitting
-- `scripts/validate_data_integrity.py` - Comprehensive validation
+## Enhanced Technical Implementation for Dual Architecture
 
-## Class Mapping Strategy
+### Enhanced Configuration Management for Dual Models
+# Enhanced dual architecture configuration
+dual_architecture:
+  binary_screening:
+    model_type: "screening"
+    input_size: 224
+    classes: 2  # Normal vs Pathological
+    sensitivity_target: 0.98
+    
+  multi_class_diagnostic:
+    model_type: "diagnostic"
+    input_sizes:   # Multi-scale processing
+    classes: 8  # Pathological conditions only
+    balanced_accuracy_target: 0.85
+    rare_class_sensitivity_target: 0.80
 
-### Unified Class Taxonomy (9 Classes)
-1. **Normal_Tympanic_Membrane** - Healthy eardrum
-2. **Acute_Otitis_Media** - Active middle ear infection
-3. **Chronic_Otitis_Media** - Persistent middle ear pathology
-4. **Cerumen_Impaction** - Earwax blockage
-5. **Otitis_Externa** - Outer ear canal inflammation
-6. **Myringosclerosis** - Eardrum scarring/calcification
-7. **Tympanostomy_Tubes** - Surgical ventilation tubes
-8. **Foreign_Bodies** - Objects in ear canal
-9. **Pseudo_Membranes** - False membrane formations
+### Enhanced Data Processing Pipeline for Dual Architecture
+Raw Datasets → Format Validation → Dual Model Preprocessing → Binary/Multi-Class Routing → Quality Validation → Unified Dual Dataset
 
-### Cross-Dataset Mapping
-```yaml
-# Example mapping (to be completed during implementation)
+### Enhanced Processing Scripts for Dual Architecture
+- `scripts/process_dual_architecture_datasets.py` - Main dual model processing pipeline
+- `scripts/create_dual_model_dataset.py` - Dual architecture dataset combination and splitting
+- `scripts/validate_dual_architecture_integrity.py` - Comprehensive dual model validation
+
+## Enhanced Class Mapping Strategy for Dual Architecture
+
+### Enhanced Binary Classification (Screening Model)
+1. **Normal_Tympanic_Membrane** - Healthy eardrum (all normal cases)
+2. **Pathological** - Any pathological condition (combined pathological cases)
+
+### Enhanced Multi-Class Diagnostic Model (Pathological Cases Only)
+1. **Acute_Otitis_Media** - Active middle ear infection
+2. **Chronic_Otitis_Media** - Persistent middle ear pathology
+3. **Cerumen_Impaction** - Earwax blockage
+4. **Otitis_Externa** - Outer ear canal inflammation
+5. **Myringosclerosis** - Eardrum scarring/calcification
+6. **Tympanostomy_Tubes** - Surgical ventilation tubes
+7. **Foreign_Bodies** - Objects in ear canal (20x augmentation)
+8. **Pseudo_Membranes** - False membrane formations (10x augmentation)
+
+### Enhanced Cross-Dataset Mapping for Dual Architecture
+# Enhanced mapping for dual architecture
 ebasaran_kaggle:
-  "Normal" → "Normal_Tympanic_Membrane"
-  "Aom" → "Acute_Otitis_Media"
-  "Chornic" → "Chronic_Otitis_Media"  # Note: original typo preserved
-  "Earwax" → "Cerumen_Impaction"
-  # ... complete mapping
+  dual_mapping:
+    binary_screening:
+      "Normal" → "Normal_Tympanic_Membrane"
+      ["Aom", "Chornic", "Earwax", "Otitis Externa", "Ear Ventilation Tube", "Foreign Bodies", "Pseudo Membranes", "Tympanoskleros"] → "Pathological"
+    
+    multi_class_diagnostic:
+      "Aom" → "Acute_Otitis_Media"
+      "Chornic" → "Chronic_Otitis_Media"  # Note: original typo preserved
+      "Earwax" → "Cerumen_Impaction"
+      "Otitis Externa" → "Otitis_Externa"
+      "Ear Ventilation Tube" → "Tympanostomy_Tubes"
+      "Foreign Bodies" → "Foreign_Bodies"  # 20x augmentation target
+      "Pseudo Membranes" → "Pseudo_Membranes"  # 10x augmentation target
+      "Tympanoskleros" → "Myringosclerosis"
 
 uci_kaggle:
-  "Normal" → "Normal_Tympanic_Membrane"
-  "Acute Otitis Media" → "Acute_Otitis_Media"
-  "Cerumen Impaction" → "Cerumen_Impaction"
-  # ... complete mapping
-```
+  dual_mapping:
+    binary_screening:
+      "Normal" → "Normal_Tympanic_Membrane"
+      ["Acute Otitis Media", "Cerumen Impaction", "Chronic Otitis Media", "Otitis Externa"] → "Pathological"
+    
+    multi_class_diagnostic:
+      "Acute Otitis Media" → "Acute_Otitis_Media"
+      "Cerumen Impaction" → "Cerumen_Impaction"
+      "Chronic Otitis Media" → "Chronic_Otitis_Media"
+      "Otitis Externa" → "Otitis_Externa"
 
-## Validation Strategy
+## Enhanced Validation Strategy for Dual Architecture
 
-### Cross-Dataset Validation Approach
-1. **Internal Validation**: Stratified splits within combined training data
-2. **External Validation**: VanAk-Figshare as completely separate test set
-3. **Clinical Validation**: Sumotosima expert annotations for interpretation
-4. **Source-Aware Evaluation**: Performance analysis by dataset source
+### Enhanced Cross-Dataset Validation Approach for Dual Models
+1. **Internal Validation**: Stratified splits within combined training data for both models
+2. **External Validation**: VanAk-Figshare as completely separate test set for dual architecture
+3. **Clinical Validation**: Sumotosima expert annotations for dual model interpretation
+4. **Source-Aware Evaluation**: Performance analysis by dataset source for both models
+5. **Cross-Model Validation**: Consistency analysis between screening and diagnostic model outputs
 
-### Quality Metrics
-- Image integrity and format consistency
-- Class distribution balance across sources
-- Cross-dataset duplicate detection
-- Processing pipeline performance benchmarks
+### Enhanced Quality Metrics for Dual Architecture
+- **Dual Model Image Integrity**: Format consistency optimized for both models
+- **Enhanced Class Distribution**: Balance analysis for both binary and multi-class scenarios
+- **Cross-Dataset Duplicate Detection**: Enhanced detection across dual model datasets
+- **Dual Architecture Performance**: Processing pipeline benchmarks for both models
 
-### Performance Expectations
-| Metric | Target | Rationale |
-|--------|---------|-----------|
-| Overall Accuracy | >90% | Clinical decision support requirement |
-| Cross-Dataset Stability | <5% variance | Generalization validation |
-| Processing Speed | <1s per image | Real-time clinical workflow |
-| Duplicate Rate | <1% | Data quality assurance |
+### Enhanced Performance Expectations for Dual Architecture
+| Metric | Binary Screening Target | Multi-Class Diagnostic Target | Clinical Impact |
+|--------|------------------------|------------------------------|-----------------|
+| **Sensitivity** | ≥98% | ≥80% (rare classes) | Critical for patient safety |
+| **Specificity** | ≥90% | ≥85% (overall) | Minimize false referrals |
+| **Cross-Dataset Stability** |  0.9, diagnostic_clarity = high',
+        'data_percentage': 0.4,
+        'dual_model_focus': 'Foundation training for both screening and diagnostic'
+    },
+    'stage_2_moderate': {
+        'weeks': '3-4', 
+        'description': 'Ambiguous and challenging presentations',
+        'selection_criteria': 'image_quality > 0.7, diagnostic_clarity = moderate',
+        'data_percentage': 0.4,
+        'dual_model_focus': 'Robustness training for both models'
+    },
+    'stage_3_hard': {
+        'weeks': '5-6',
+        'description': 'Edge cases and rare pathological presentations',
+        'selection_criteria': 'all_remaining_cases, focus_on_rare_classes',
+        'data_percentage': 0.2,
+        'dual_model_focus': 'Specialized training for diagnostic model, edge case detection for screening'
+    }
+}
 
-## Clinical Integration Context
+### Enhanced Case Selection Methodology for Dual Architecture
+- **Dual Model Quality Scoring**: Image quality assessment optimized for both screening and diagnostic models
+- **Enhanced Clinical Expert Review**: Specialist protocols for challenging case identification across both models
+- **Dual Architecture Complexity Scoring**: Automated case difficulty assessment based on both model uncertainties
+- **Enhanced Feedback Loops**: Curriculum optimization protocols for dual model performance
 
-### Multi-Modal System Integration
-- Image classification provides **40% weight** in final diagnostic decision
-- Integration with symptom assessment (35%) and patient history (25%)
-- Clinical decision support with confidence-based recommendations
-- Safety protocols for low-confidence cases requiring human review
+## Enhanced Next Steps for Dual Architecture
 
-### Regulatory Considerations
-- FDA guidelines compliance for medical AI validation
-- Cross-institutional validation following medical device standards
-- Documentation requirements for regulatory submission
-- Clinical trial protocol alignment
+1. **Complete Dual Architecture Class Mapping**: Finalize mapping between all dataset class names for both models
+2. **Implement Enhanced Processing Pipeline**: Execute unified preprocessing across all datasets with dual model optimization
+3. **Validate Dual Architecture Integration**: Comprehensive quality assurance and validation for both models
+4. **Clinical Review for Dual Models**: Expert validation of integrated dual architecture dataset quality
+5. **Enhanced Model Training**: Begin parallel training of binary screening and multi-class diagnostic models
 
-## Implementation Timeline
+## Enhanced Risk Mitigation for Dual Architecture
 
-### Week 1-2: Infrastructure Setup
-- [ ] Create configuration framework
-- [ ] Set up processing scripts structure
-- [ ] Implement basic validation tools
+### Enhanced Technical Risks for Dual Models
+- **Dual Model Data Quality**: Comprehensive validation and quality checking for both models
+- **Enhanced Class Imbalance**: Differential augmentation and loss weighting for dual architecture
+- **Cross-Model Domain Shift**: Cross-dataset evaluation and domain adaptation for both models
 
-### Week 3-4: Dataset Processing
-- [ ] Process all 4 datasets with unified pipeline
-- [ ] Implement class mapping logic
-- [ ] Validate data integrity across sources
+### Enhanced Clinical Risks for Dual Architecture
+- **Dual Model Bias Introduction**: Multi-source validation and bias testing across both models
+- **Enhanced Performance Degradation**: Conservative clinical thresholds with dual model safety protocols
+- **Dual Model Interpretability**: Expert-validated explanation generation for both screening and diagnostic outputs
 
-### Week 5-6: Integration and Validation
-- [ ] Create combined dataset structure
-- [ ] Implement cross-dataset validation
-- [ ] Generate comprehensive integration report
-
-### Week 7-8: Documentation and Testing
-- [ ] Complete technical documentation
-- [ ] Implement automated testing suite
-- [ ] Validate clinical integration readiness
-
-## Next Steps
-
-1. **Complete Class Mapping**: Finalize mapping between all dataset class names
-2. **Implement Processing Pipeline**: Execute unified preprocessing across all datasets
-3. **Validate Integration**: Comprehensive quality assurance and validation
-4. **Clinical Review**: Expert validation of integrated dataset quality
-5. **Model Training**: Begin training on combined dataset with cross-validation
-
-## Risk Mitigation
-
-### Technical Risks
-- **Data Quality**: Comprehensive validation and quality checking
-- **Class Imbalance**: Differential augmentation and loss weighting
-- **Domain Shift**: Cross-dataset evaluation and domain adaptation
-
-### Clinical Risks
-- **Bias Introduction**: Multi-source validation and bias testing
-- **Performance Degradation**: Conservative clinical thresholds
-- **Interpretability**: Expert-validated explanation generation
+### Enhanced Medical/Legal Risks for Dual Architecture
+- **Dual Model Validation**: Independent verification of both screening and diagnostic models
+- **Conservative Thresholds**: Enhanced safety margins with high-sensitivity pathology detection
+- **Automatic Referral Protocols**: Systematic specialist consultation for high-risk conditions detected by either model
+- **Expert Override Capabilities**: Built-in systems for clinical expert review and intervention
 
 ---
 
-*This document should be updated as implementation progresses and new insights are gained from the integration process.*
+*This enhanced dual architecture document should be updated as implementation progresses and new insights are gained from the parallel hierarchical classification process.*

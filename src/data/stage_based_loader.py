@@ -86,7 +86,7 @@ class StageBasedDatasetManager:
                 # Create base dataset
                 base_dataset = ImageDataset(
                     data_dir=data_path,
-                    image_size=stage_config.get('image_size', 384),
+                    image_size=stage_config.get('image_size', 500),
                     use_radimagenet=stage_config.get('use_radimagenet', True),
                     training=(stage_name != 'validation')  # No training transforms for validation
                 )
@@ -263,7 +263,7 @@ def create_medical_ai_datasets(
     base_training_path: str = "data/processed/ebasaran-kaggale",
     fine_tuning_path: str = "data/processed/uci-kaggle", 
     validation_path: str = "data/processed/vanak-figshare",
-    image_size: int = 384
+    image_size: int = 500
 ) -> StageBasedDatasetManager:
     """
     Factory function for standard medical AI multi-dataset setup.

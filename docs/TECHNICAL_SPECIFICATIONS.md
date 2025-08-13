@@ -1,208 +1,299 @@
-# Technical Specifications - Multi-Modal Ear Diagnosis System
+# Technical Specifications - Enhanced Multi-Modal Ear Diagnosis System
 
-## System Requirements
+## Enhanced System Requirements
 
-### Performance Requirements
-- **Image Classification**: <3 seconds response time
-- **Symptom Processing**: <1 second response time  
-- **Decision Tree**: <2 seconds for complete diagnosis
-- **Concurrent Users**: Support 100+ simultaneous sessions
-- **Uptime**: 99.5% availability target
+### Enhanced Performance Requirements
+- **Binary Screening Model**: 95% for pathological conditions
+- **Overall System Specificity**: >88% for normal conditions
+- **Cross-Dataset Consistency**: 1.5) and moderate (ratio >1.3) color casts
+- **Exposure Analysis**: Detection of over/under-exposure issues with brightness thresholds
+- **Multi-Scale Support**: Processing pipeline supports 224×224, 384×384, 500×500 resolutions
 
-### Accuracy Requirements
-- **Image Classification**: >90% accuracy on validation set
-- **Overall System Sensitivity**: >90% for pathological conditions
-- **Overall System Specificity**: >85% for normal conditions
-- **False Positive Rate**: <15%
-- **False Negative Rate**: <10%
+#### Enhanced Training Pipeline Configuration
 
-## Image Classification Component
+# Dual architecture training configuration
+TRAINING_CONFIG = {
+    'binary_screening': {
+        'model': 'efficientnet_b3',
+        'input_size': 224,
+        'batch_size': 32,
+        'learning_rate': 1e-4,
+        'sensitivity_target': 0.98,
+        'specificity_target': 0.90
+    },
+    'multi_class_diagnostic': {
+        'model': 'dual_scale_fusion',
+        'input_sizes': ,
+        'batch_size': 16,
+        'learning_rate': 5e-5,
+        'balanced_accuracy_target': 0.85,
+        'rare_class_sensitivity_target': 0.80
+    }
+}
 
-### Model Architecture
-```python
-# Recommended CNN Architecture
-class EarConditionClassifier(nn.Module):
-    def __init__(self, num_classes=9):
+
+#### Adaptive Loss Function Implementation
+
+class AdaptiveFocalLoss(nn.Module):
+    """Enhanced focal loss with dynamic gamma based on class frequency"""
+    def __init__(self, alpha=1, gamma_base=2.0):
         super().__init__()
-        # Base: EfficientNet-B3 or ResNet-50
-        self.backbone = timm.create_model('efficientnet_b3', pretrained=True)
-        self.classifier = nn.Sequential(
-            nn.Dropout(0.3),
-            nn.Linear(self.backbone.num_features, 512),
-            nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(512, num_classes)
-        )
+        self.alpha = alpha
+        self.gamma_base = gamma_base
+        
+    def forward(self, inputs, targets, class_frequencies):
+        # Dynamic gamma based on class frequency
+        gamma = self.gamma_base * (1 / class_frequencies[targets])
+        
+        ce_loss = F.cross_entropy(inputs, targets, reduction='none')
+        pt = torch.exp(-ce_loss)
+        focal_loss = self.alpha * (1-pt)**gamma * ce_loss
+        
+        return focal_loss.mean()
+
+class UncertaintyQuantification(nn.Module):
+    """Monte Carlo dropout for uncertainty estimation"""
+    def __init__(self, model, n_samples=100):
+        super().__init__()
+        self.model = model
+        self.n_samples = n_samples
     
     def forward(self, x):
-        features = self.backbone.forward_features(x)
-        features = self.backbone.global_pool(features)
-        return self.classifier(features)
-```
+        self.model.train()  # Enable dropout during inference
+        predictions = []
+        
+        for _ in range(self.n_samples):
+            with torch.no_grad():
+                pred = self.model(x)
+                predictions.append(F.softmax(pred, dim=1))
+        
+        predictions = torch.stack(predictions)
+        mean_pred = predictions.mean(dim=0)
+        uncertainty = predictions.var(dim=0).mean(dim=1)
+        
+        return mean_pred, uncertainty
 
-### Data Pipeline
 
-#### Enhanced Image Preprocessing (`src/preprocessing/image_utils.py`)
-- **Medical-Grade Enhancement**: LAB color space CLAHE processing optimized for otoscopy images
-- **Quality Assessment Framework**: Comprehensive image quality analysis with automated scoring
-- **Input Standardization**: All images converted to 500x500 PNG format with lossless compression
-- **Color Cast Detection**: Automatic detection of severe (ratio >1.5) and moderate (ratio >1.3) color casts
-- **Exposure Analysis**: Detection of over/under-exposure issues with brightness thresholds
-- **Quality Metrics**: Automated quality scoring on 0-1 scale based on multiple factors
-- **Idempotent Processing**: Safe to run multiple times without reprocessing existing files
+### Enhanced Augmentation Strategy
 
-#### Preprocessing Command Line Interface
-```bash
-# Basic processing with quality assessment
-python src/preprocessing/image_utils.py
-
-# Strict quality mode - reject images with any quality issues
-python src/preprocessing/image_utils.py --strict-quality
-
-# Custom quality threshold (0-1 scale, default: 0.8)
-python src/preprocessing/image_utils.py --quality-threshold 0.9
-
-# Force reprocessing of existing files
-python src/preprocessing/image_utils.py --force-reprocess
-
-# Verbose output with detailed processing information
-python src/preprocessing/image_utils.py --verbose
-```
-
-#### Quality Assessment Metrics
-- **Color Cast Ratio**: Channel imbalance detection (max_channel/min_channel)
-- **Brightness Analysis**: Overall image brightness with extreme value detection
-- **Exposure Classification**: Over/under-exposure based on pixel value distributions
-- **Quality Score**: Composite score (0-1) incorporating all quality factors
-- **Processing Report**: Comprehensive JSON report with statistics and quality details
-
-#### Training Data Pipeline
-- **Input Size**: 224x224 or 384x384 pixels (resized from standardized 500x500)
-- **Normalization**: ImageNet statistics
-- **Augmentations**: 
-  - Rotation (±15°)
-  - Brightness/Contrast (±0.2)
-  - Horizontal flip
-  - Color jittering
-  - Gaussian blur (occasional)
-
-### Training Configuration
-- **Optimizer**: AdamW with weight decay
-- **Learning Rate**: 1e-4 with cosine annealing
-- **Batch Size**: 32-64 (depending on GPU memory)
-- **Loss Function**: Cross-entropy with class weights
-- **Validation Split**: 80/20 train/validation
-- **Early Stopping**: Patience of 10 epochs
-
-## Decision Tree Engine
-
-### Scoring Algorithm
-```python
-def calculate_diagnostic_score(image_pred, symptoms, history):
-    """
-    Calculate weighted diagnostic score
-    
-    Weights:
-    - Image: 40%
-    - Symptoms: 35% 
-    - History: 25%
-    """
-    
-    # Image component (0-1 scale)
-    image_score = max(image_pred.values())
-    image_weight = 0.4
-    
-    # Symptom component (0-1 scale)
-    symptom_score = calculate_symptom_match(symptoms)
-    symptom_weight = 0.35
-    
-    # History component (0-1 scale)
-    history_score = calculate_risk_score(history)
-    history_weight = 0.25
-    
-    final_score = (
-        image_score * image_weight +
-        symptom_score * symptom_weight + 
-        history_score * history_weight
-    )
-    
-    return final_score
-```
-
-### Decision Thresholds
-- **High Confidence**: ≥0.85 → Provide diagnosis
-- **Medium Confidence**: 0.65-0.84 → Probable diagnosis
-- **Low Confidence**: <0.65 → Recommend examination
-- **Critical Symptoms**: Immediate referral triggers
-
-### Symptom Patterns
-```python
-SYMPTOM_PATTERNS = {
-    'Acute_Otitis_Media': {
-        'pain': {'weight': 0.3, 'threshold': 6},
-        'fever': {'weight': 0.25, 'presence': True},
-        'hearing_loss': {'weight': 0.2, 'presence': True},
-        'discharge': {'weight': 0.15, 'type': 'purulent'},
-        'duration': {'weight': 0.1, 'max_days': 14}
+ENHANCED_AUGMENTATION = {
+    'binary_screening': {
+        'normal_cases': {
+            'transforms': [
+                A.HorizontalFlip(p=0.5),
+                A.Rotate(limit=15, p=0.7),
+                A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, p=0.5),
+                A.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.05, p=0.3)
+            ],
+            'factor': 2
+        },
+        'pathological_cases': {
+            'transforms': [
+                A.HorizontalFlip(p=0.5),
+                A.Rotate(limit=15, p=0.7),
+                A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.6),
+                A.GaussianBlur(blur_limit=3, p=0.2),
+                A.ColorJitter(brightness=0.15, contrast=0.15, saturation=0.1, hue=0.05, p=0.4)
+            ],
+            'factor': 3
+        }
     },
-    'Chronic_Otitis_Media': {
-        'discharge': {'weight': 0.35, 'persistent': True},
-        'hearing_loss': {'weight': 0.3, 'gradual': True},
-        'pain': {'weight': 0.15, 'mild': True},
-        'duration': {'weight': 0.2, 'min_days': 30}
-    },
-    # ... other patterns
+    'multi_class_diagnostic': {
+        'Foreign_Bodies': {
+            'transforms': [
+                A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.2, rotate_limit=20, p=0.8),
+                A.RandomBrightnessContrast(brightness_limit=0.4, contrast_limit=0.4, p=0.7),
+                A.HueSaturationValue(hue_shift_limit=10, sat_shift_limit=15, val_shift_limit=10, p=0.5),
+                A.ElasticTransform(alpha=50, sigma=5, p=0.3),
+                A.GridDistortion(num_steps=5, distort_limit=0.1, p=0.3)
+            ],
+            'factor': 20  # 3 → 60 images
+        },
+        'Pseudo_Membranes': {
+            'transforms': [
+                A.Rotate(limit=10, p=0.8),
+                A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.7),
+                A.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.05, hue=0.02, p=0.6),
+                A.GaussianNoise(var_limit=(5, 15), p=0.3)
+            ],
+            'factor': 10  # 11 → 110 images
+        },
+        'common_pathologies': {
+            'transforms': [
+                A.HorizontalFlip(p=0.5),
+                A.Rotate(limit=10, p=0.5),
+                A.RandomBrightnessContrast(brightness_limit=0.15, contrast_limit=0.15, p=0.4)
+            ],
+            'factor': 2
+        }
+    }
 }
-```
 
-## API Specifications
 
-### Endpoints
+## Enhanced Decision Tree Engine
 
-#### Image Classification
-```http
-POST /api/v1/classify-image
+### Dual Architecture Integration Algorithm
+
+def enhanced_diagnostic_decision(screening_result, diagnostic_result, symptoms, history):
+    """
+    Enhanced decision tree with dual model integration and clinical safety protocols
+    """
+    
+    # Stage 1: Binary screening decision with high sensitivity threshold
+    if screening_result['pathology_probability'] = 0.85:
+        # High confidence pathological - proceed with detailed diagnosis
+        pathology_diagnosis = diagnostic_result['top_prediction']
+        
+        # Enhanced multi-modal integration with weighted evidence
+        symptom_score = calculate_enhanced_symptom_score(symptoms, pathology_diagnosis) * 0.35
+        history_score = calculate_risk_stratified_score(history, pathology_diagnosis) * 0.25
+        image_score = combine_dual_model_scores(screening_result, diagnostic_result) * 0.40
+        
+        final_confidence = image_score + symptom_score + history_score
+        
+        return apply_enhanced_clinical_safety_protocols(pathology_diagnosis, final_confidence, symptoms)
+    
+    # Stage 3: Intermediate confidence - require additional validation
+    else:
+        return {
+            'primary_diagnosis': 'UNCERTAIN',
+            'confidence': 'MODERATE',
+            'action': 'ADDITIONAL_CLINICAL_EVALUATION_REQUIRED',
+            'reason': 'Conflicting evidence between screening and diagnostic models',
+            'recommendation': 'Professional otoscopic examination recommended'
+        }
+
+def combine_dual_model_scores(screening_result, diagnostic_result):
+    """Combine binary screening and multi-class diagnostic scores"""
+    screening_confidence = screening_result['pathology_probability']
+    diagnostic_confidence = max(diagnostic_result['class_probabilities'].values())
+    
+    # Weighted combination favoring screening sensitivity
+    combined_score = (screening_confidence * 0.6) + (diagnostic_confidence * 0.4)
+    
+    return combined_score
+
+def apply_enhanced_clinical_safety_protocols(diagnosis, confidence, symptoms):
+    """Enhanced safety protocols with automatic referral and monitoring systems"""
+    
+    # High-risk diagnoses require specialist referral regardless of confidence
+    HIGH_RISK_CONDITIONS = ['Chronic_Otitis_Media', 'Foreign_Bodies', 'Pseudo_Membranes']
+    EMERGENCY_SYMPTOMS = ['severe_pain_sudden_onset', 'facial_paralysis', 'severe_dizziness']
+    
+    # Emergency protocol activation
+    if any(symptom in symptoms for symptom in EMERGENCY_SYMPTOMS):
+        return {
+            'primary_diagnosis': diagnosis,
+            'confidence': confidence,
+            'action': 'EMERGENCY_ENT_REFERRAL',
+            'urgency': 'IMMEDIATE',
+            'reason': 'Emergency symptoms detected'
+        }
+    
+    # High-risk pathology protocol
+    if diagnosis in HIGH_RISK_CONDITIONS:
+        return {
+            'primary_diagnosis': diagnosis,
+            'confidence': confidence,
+            'action': 'SPECIALIST_ENT_REFERRAL',
+            'reason': 'High-risk pathology detected',
+            'urgency': 'WITHIN_24_HOURS',
+            'monitoring': 'CONTINUOUS'
+        }
+    
+    # Enhanced confidence thresholds with safety margins
+    if confidence >= 0.90:  # Raised threshold for higher certainty
+        return {
+            'action': 'INITIATE_TREATMENT',
+            'monitoring': 'STANDARD',
+            'follow_up': '48_HOURS'
+        }
+    elif confidence >= 0.75:  # Conservative approach for moderate confidence
+        return {
+            'action': 'PROBABLE_DIAGNOSIS_MONITOR', 
+            'follow_up': '24_HOURS',
+            'additional_testing': 'CONSIDER'
+        }
+    else:
+        return {
+            'action': 'CLINICAL_EXAMINATION_REQUIRED', 
+            'urgency': 'WITHIN_24_HOURS',
+            'reason': 'Insufficient confidence for remote diagnosis'
+        }
+
+
+### Enhanced Curriculum Learning Integration
+
+CURRICULUM_STAGES = {
+    'stage_1_easy': {
+        'weeks': '1-2',
+        'description': 'Clear, high-quality diagnostic cases',
+        'selection_criteria': 'image_quality > 0.9, diagnostic_clarity = high',
+        'data_percentage': 0.4
+    },
+    'stage_2_moderate': {
+        'weeks': '3-4', 
+        'description': 'Ambiguous and challenging presentations',
+        'selection_criteria': 'image_quality > 0.7, diagnostic_clarity = moderate',
+        'data_percentage': 0.4
+    },
+    'stage_3_hard': {
+        'weeks': '5-6',
+        'description': 'Edge cases and rare pathological presentations',
+        'selection_criteria': 'all_remaining_cases, focus_on_rare_classes',
+        'data_percentage': 0.2
+    }
+}
+
+
+## Enhanced API Specifications
+
+### Dual Architecture Endpoints
+
+#### Binary Screening
+
+POST /api/v1/screen-pathology
 Content-Type: multipart/form-data
 
 Response:
 {
-    "predictions": {
-        "Normal_Tympanic_Membrane": 0.85,
-        "Acute_Otitis_Media": 0.10,
-        "Chronic_Otitis_Media": 0.03,
-        ...
+    "screening_result": {
+        "pathology_probability": 0.92,
+        "normal_probability": 0.08,
+        "confidence": "HIGH",
+        "sensitivity_threshold": 0.98
     },
-    "confidence": 0.85,
-    "processing_time": 2.3
+    "processing_time": 1.8,
+    "model_version": "screening_v2.1"
 }
-```
 
-#### Symptom Assessment
-```http
-POST /api/v1/assess-symptoms
-Content-Type: application/json
 
-{
-    "symptoms": {
-        "pain_level": 7,
-        "fever_present": true,
-        "discharge_present": true,
-        "hearing_changes": "reduced",
-        "duration_days": 3
-    }
-}
+#### Multi-Class Diagnostic
+
+POST /api/v1/diagnose-pathology
+Content-Type: multipart/form-data
 
 Response:
 {
-    "symptom_score": 0.78,
-    "pattern_matches": ["Acute_Otitis_Media", "Otitis_Externa"],
-    "red_flags": []
+    "diagnostic_result": {
+        "top_prediction": "Acute_Otitis_Media",
+        "class_probabilities": {
+            "Acute_Otitis_Media": 0.78,
+            "Chronic_Otitis_Media": 0.12,
+            "Otitis_Externa": 0.08,
+            "Foreign_Bodies": 0.02
+        },
+        "uncertainty_score": 0.15,
+        "rare_class_confidence": 0.85
+    },
+    "processing_time": 2.1,
+    "model_version": "diagnostic_v2.1"
 }
-```
 
-#### Complete Diagnosis
-```http
-POST /api/v1/diagnose
+
+#### Complete Dual Architecture Diagnosis
+
+POST /api/v1/dual-diagnose
 Content-Type: application/json
 
 {
@@ -213,94 +304,129 @@ Content-Type: application/json
 
 Response:
 {
-    "primary_diagnosis": "Acute_Otitis_Media",
-    "confidence": 0.89,
+    "screening_stage": {
+        "pathology_detected": true,
+        "confidence": 0.92,
+        "proceed_to_diagnosis": true
+    },
+    "diagnostic_stage": {
+        "primary_diagnosis": "Acute_Otitis_Media",
+        "confidence": 0.89,
+        "uncertainty_score": 0.12
+    },
+    "combined_result": {
+        "final_diagnosis": "Acute_Otitis_Media",
+        "overall_confidence": 0.91,
+        "safety_protocol": "STANDARD_TREATMENT",
+        "referral_required": false
+    },
     "differential_diagnoses": [
-        {"condition": "Otitis_Externa", "probability": 0.23},
-        {"condition": "Normal_Tympanic_Membrane", "probability": 0.15}
+        {"condition": "Chronic_Otitis_Media", "probability": 0.15},
+        {"condition": "Otitis_Externa", "probability": 0.08}
     ],
     "recommendations": [
-        "Consider antibiotic treatment",
-        "Follow up in 48-72 hours if symptoms persist"
+        "Initiate appropriate antibiotic treatment",
+        "Monitor response to treatment within 48-72 hours",
+        "Consider ENT referral if no improvement in 5-7 days"
     ],
-    "referral_needed": false
+    "processing_time": 2.9
 }
-```
 
-## Database Schema
 
-### Patients Table
-```sql
-CREATE TABLE patients (
-    id SERIAL PRIMARY KEY,
-    age INTEGER,
-    gender VARCHAR(10),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
+## Enhanced Database Schema
 
-### Diagnoses Table
-```sql
-CREATE TABLE diagnoses (
+### Dual Model Predictions Table
+
+CREATE TABLE dual_model_predictions (
     id SERIAL PRIMARY KEY,
     patient_id INTEGER REFERENCES patients(id),
+    screening_predictions JSONB,  -- Binary screening results
+    diagnostic_predictions JSONB, -- Multi-class diagnostic results
+    combined_confidence DECIMAL(3,2),
+    uncertainty_score DECIMAL(3,2),
+    model_versions JSONB,  -- Track both model versions
+    processing_time_ms INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+### Enhanced Diagnoses Table
+
+CREATE TABLE enhanced_diagnoses (
+    id SERIAL PRIMARY KEY,
+    patient_id INTEGER REFERENCES patients(id),
+    dual_prediction_id INTEGER REFERENCES dual_model_predictions(id),
     image_path VARCHAR(255),
-    image_predictions JSONB,
+    screening_stage_result JSONB,
+    diagnostic_stage_result JSONB,
     symptoms JSONB,
     patient_history JSONB,
     final_diagnosis VARCHAR(100),
     confidence_score DECIMAL(3,2),
+    uncertainty_score DECIMAL(3,2),
+    safety_protocol VARCHAR(50),
+    referral_required BOOLEAN,
+    clinical_action VARCHAR(100),
+    urgency_level VARCHAR(20),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-```
 
-### Patient History Table
-```sql
-CREATE TABLE patient_history (
+
+### Model Performance Tracking
+
+CREATE TABLE model_performance_metrics (
     id SERIAL PRIMARY KEY,
-    patient_id INTEGER REFERENCES patients(id),
-    previous_ear_infections INTEGER DEFAULT 0,
-    allergies TEXT[],
-    medications TEXT[],
-    risk_factors TEXT[],
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    model_type VARCHAR(20),  -- 'screening' or 'diagnostic'
+    model_version VARCHAR(20),
+    dataset_source VARCHAR(50),
+    sensitivity DECIMAL(4,3),
+    specificity DECIMAL(4,3),
+    balanced_accuracy DECIMAL(4,3),
+    rare_class_sensitivity DECIMAL(4,3),
+    cross_dataset_variance DECIMAL(4,3),
+    evaluation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-```
 
-## Security Requirements
 
-### Data Protection
-- **Encryption**: AES-256 for data at rest
-- **Transport**: TLS 1.3 for data in transit
-- **Authentication**: JWT tokens with rotation
-- **Session Management**: Secure session handling
-- **HIPAA Compliance**: PHI data handling protocols
+## Enhanced Security Requirements
 
-### Access Control
-- **Role-Based Access**: Admin, Clinician, Patient roles
-- **API Rate Limiting**: 100 requests/minute per user
-- **Input Validation**: Strict validation for all inputs
-- **Audit Logging**: Complete audit trail for diagnoses
+### Enhanced Data Protection
+- **Multi-Model Encryption**: Separate encryption keys for screening and diagnostic models
+- **Dual Authentication**: Two-factor authentication for model access
+- **Audit Trail Enhancement**: Complete tracking of dual model decision pathways
+- **Uncertainty Logging**: Secure logging of uncertainty scores for clinical review
 
-## Deployment Architecture
+### Enhanced Access Control
+- **Model-Specific Permissions**: Granular access control for different model components
+- **Clinical Role Management**: Specialized permissions for ENT specialists vs general practitioners
+- **Emergency Override Protocols**: Secure emergency access for critical diagnoses
+- **Confidence-Based Access**: Different access levels based on diagnostic confidence
 
-### Container Structure
-```dockerfile
-# Multi-stage build
-FROM python:3.12-slim as base
-# ... dependencies
+## Enhanced Deployment Architecture
 
-FROM base as ml-service
-COPY src/model_*.py ./
-# ... ML service specific setup
+### Dual Model Container Structure
 
-FROM base as web-service  
-COPY app/ ./
-# ... web interface setup
-```
+# Multi-stage build for dual architecture
+FROM pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime as base
+# ... base dependencies
 
-### Docker Compose Services
-```yaml
+FROM base as screening-service
+COPY src/models/binary_screening.py ./
+COPY models/screening_model_v2.1.pth ./
+# ... screening model specific setup
+
+FROM base as diagnostic-service  
+COPY src/models/multiclass_diagnostic.py ./
+COPY models/diagnostic_model_v2.1.pth ./
+# ... diagnostic model specific setup
+
+FROM base as integration-service
+COPY src/integration/ ./
+# ... dual model integration logic
+
+
+### Enhanced Docker Compose Configuration
+
 version: '3.8'
 services:
   nginx:
@@ -308,19 +434,15 @@ services:
     ports:
       - "80:80"
       - "443:443"
-    
-  web-app:
-    build: 
-      context: .
-      target: web-service
     depends_on:
-      - ml-service
-      - postgres
-      
-  ml-service:
+      - screening-service
+      - diagnostic-service
+      - integration-service
+    
+  screening-service:
     build:
       context: .
-      target: ml-service
+      target: screening-service
     deploy:
       resources:
         reservations:
@@ -328,11 +450,42 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
-  
+    environment:
+      - MODEL_TYPE=screening
+      - SENSITIVITY_TARGET=0.98
+      
+  diagnostic-service:
+    build:
+      context: .
+      target: diagnostic-service
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      - MODEL_TYPE=diagnostic
+      - BALANCED_ACCURACY_TARGET=0.85
+      
+  integration-service:
+    build:
+      context: .
+      target: integration-service
+    depends_on:
+      - screening-service
+      - diagnostic-service
+      - postgres
+      - redis
+    environment:
+      - SCREENING_SERVICE_URL=http://screening-service:5000
+      - DIAGNOSTIC_SERVICE_URL=http://diagnostic-service:5001
+      
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_DB: ear_diagnosis
+      POSTGRES_DB: enhanced_ear_diagnosis
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
@@ -341,62 +494,107 @@ services:
   redis:
     image: redis:alpine
     command: redis-server --requirepass ${REDIS_PASSWORD}
-```
 
-## Monitoring and Logging
 
-### Metrics to Track
-- **Response Times**: Per endpoint and component
-- **Accuracy Metrics**: Model performance over time
-- **Error Rates**: 4xx/5xx response codes
-- **Resource Usage**: CPU, memory, GPU utilization
-- **User Engagement**: Diagnosis completion rates
+## Enhanced Monitoring and Logging
 
-### Logging Structure
-```python
-import structlog
+### Dual Model Performance Metrics
 
-logger = structlog.get_logger()
+ENHANCED_METRICS = {
+    'screening_model': [
+        'sensitivity', 'specificity', 'false_negative_rate',
+        'cross_dataset_consistency', 'inference_time'
+    ],
+    'diagnostic_model': [
+        'balanced_accuracy', 'rare_class_sensitivity', 
+        'uncertainty_calibration', 'expert_agreement'
+    ],
+    'combined_system': [
+        'overall_diagnostic_accuracy', 'clinical_decision_impact',
+        'referral_appropriateness', 'time_to_diagnosis'
+    ]
+}
 
-logger.info(
-    "diagnosis_completed",
-    patient_id=patient_id,
-    diagnosis=diagnosis,
-    confidence=confidence_score,
-    processing_time=processing_time,
-    components_used=["image", "symptoms", "history"]
-)
-```
 
-### Health Checks
-```python
-@app.get("/health")
-async def health_check():
+### Enhanced Health Checks
+
+@app.get("/health/dual-architecture")
+async def dual_architecture_health():
     return {
         "status": "healthy",
         "timestamp": datetime.utcnow(),
         "version": VERSION,
         "components": {
+            "screening_model": {
+                "loaded": check_screening_model_loaded(),
+                "performance": get_screening_performance_metrics(),
+                "sensitivity_target": 0.98
+            },
+            "diagnostic_model": {
+                "loaded": check_diagnostic_model_loaded(), 
+                "performance": get_diagnostic_performance_metrics(),
+                "balanced_accuracy_target": 0.85
+            },
+            "integration_engine": check_integration_engine(),
             "database": check_db_connection(),
-            "ml_model": check_model_loaded(),
-            "redis": check_cache_connection()
+            "cache": check_cache_connection()
         }
     }
-```
 
-## Testing Strategy
 
-### Unit Tests
-- **Model Tests**: Prediction accuracy, input validation
-- **API Tests**: Endpoint functionality, error handling
-- **Decision Tree**: Logic validation with known cases
+## Enhanced Testing Strategy
 
-### Integration Tests
-- **End-to-End**: Complete diagnostic workflows
-- **Performance**: Load testing with concurrent users
-- **Security**: Penetration testing, vulnerability scanning
+### Dual Architecture Testing
 
-### Clinical Validation
-- **Test Cases**: Curated set of known diagnoses
-- **Expert Review**: ENT specialist validation
-- **Bias Testing**: Performance across demographics
+class TestDualArchitecture:
+    def test_screening_sensitivity(self):
+        """Test binary screening model meets 98% sensitivity target"""
+        pass
+        
+    def test_diagnostic_balanced_accuracy(self):
+        """Test multi-class diagnostic model meets 85% balanced accuracy"""
+        pass
+        
+    def test_rare_class_performance(self):
+        """Test 80%+ sensitivity for Foreign Bodies and Pseudo Membranes"""
+        pass
+        
+    def test_cross_dataset_consistency(self):
+        """Test <5% performance variation across datasets"""
+        pass
+        
+    def test_uncertainty_calibration(self):
+        """Test uncertainty scores are well-calibrated"""
+        pass
+        
+    def test_clinical_safety_protocols(self):
+        """Test automatic referral systems for high-risk conditions"""
+        pass
+
+
+### Enhanced Clinical Validation
+- **ENT Specialist Review**: 90%+ agreement target with specialist otolaryngologists
+- **Cross-Institutional Testing**: Validation across multiple healthcare institutions
+- **Prospective Clinical Study**: Real-world deployment validation
+- **Bias Assessment**: Performance evaluation across demographic groups
+- **Long-term Monitoring**: Continuous performance tracking in clinical deployment
+
+## Enhanced Success Criteria
+
+### Technical Performance Targets
+| Component | Metric | Target | Clinical Impact |
+|-----------|--------|--------|-----------------|
+| **Binary Screening** | Sensitivity | ≥98% | Critical for patient safety |
+| **Binary Screening** | Specificity | ≥90% | Minimize false positive referrals |
+| **Multi-Class Diagnostic** | Balanced Accuracy | ≥85% | Specific diagnosis accuracy |
+| **Multi-Class Diagnostic** | Rare Class Sensitivity | ≥80% | Foreign Bodies/Pseudo Membranes |
+| **Combined System** | Expert Agreement | ≥90% | Clinical validation |
+| **Combined System** | Cross-Dataset Consistency | <5% variance | Generalization validation |
+| **Combined System** | Inference Time | <3 seconds | Clinical workflow integration |
+
+### Clinical Integration Targets
+- **Diagnostic Speed Improvement**: 50% reduction in time to diagnosis
+- **Healthcare Cost Impact**: Measurable reduction in unnecessary specialist referrals
+- **Clinical Utility Validation**: Positive impact on treatment decisions
+- **User Satisfaction**: 85%+ satisfaction rating from healthcare professionals
+- **False Referral Reduction**: Systematic decrease in inappropriate ENT referrals
