@@ -14,7 +14,22 @@ This is an otitis and ear conditions classifier project that analyzes medical im
 - **Direct Streamlit**: `streamlit run app/app.py --server.address=0.0.0.0` (requires Python environment with requirements.txt installed)
 
 ### Data Processing
-- **Image Preprocessing**: `python src/preprocessing/image_utils.py` - Convert all raw images to PNG with CLAHE enhancement
+
+#### Enhanced Image Preprocessing Pipeline
+- **Basic Processing**: `python src/preprocessing/image_utils.py` - Convert all raw images to PNG with CLAHE enhancement and quality assessment
+- **Force Reprocessing**: `python src/preprocessing/image_utils.py --force-reprocess` - Reprocess even if output files already exist
+- **Strict Quality Mode**: `python src/preprocessing/image_utils.py --strict-quality` - Skip saving images with any quality issues
+- **Quality Threshold**: `python src/preprocessing/image_utils.py --quality-threshold 0.9` - Set minimum quality score (0-1, default: 0.8)
+- **Verbose Mode**: `python src/preprocessing/image_utils.py --verbose` - Enable debug-level logging for detailed processing info
+- **Processing Report**: Automatically generates `data/processed/preprocessing_report.json` with comprehensive statistics
+
+#### Advanced Processing Features
+- **Idempotent Processing**: Script can be run multiple times safely without reprocessing existing files
+- **Quality Assessment**: Comprehensive image quality analysis with color cast detection and exposure assessment
+- **Progress Tracking**: Real-time progress indicators with estimated completion times
+- **Medical-Grade Enhancement**: LAB color space CLAHE processing optimized for medical imaging
+
+#### Other Data Processing
 - **Multi-Dataset Processing**: `python scripts/process_all_datasets.py` - Unified processing pipeline for all 4 datasets
 - **Dataset Integration**: `python scripts/create_combined_dataset.py` - Combine datasets with source-aware splitting
 - **Data Validation**: `python scripts/validate_data_integrity.py` - Comprehensive quality assurance and validation
@@ -106,13 +121,15 @@ The system classifies 9 ear conditions with combined dataset totals and clinical
 - **Infrastructure Complete**: Multi-dataset foundation established with comprehensive architecture
 - **Unix Philosophy Implementation**: Modular, composable architecture with single-responsibility functions
 - **Configuration System**: Industry-standard YAML configuration management implemented
-- **Processing Pipeline**: Multi-dataset processing scripts created with validation framework (2,363 PNG images processed)
+- **Enhanced Processing Pipeline**: Production-ready image preprocessing with comprehensive quality assessment (2,363+ PNG images processed)
+- **Quality Assessment Framework**: Medical-grade image quality analysis with color cast detection, exposure assessment, and automated quality scoring
 - **Clinical Architecture**: Medical-grade model architectures and evaluation metrics structured
 - **Documentation Framework**: Complete clinical integration and deployment guidance
 - **Container Optimization**: Docker configuration ready for clinical deployment
 - **Modular Data Loading**: Simple, composable data loading components following Unix principles
-- **PNG Standardization Complete**: All datasets converted to PNG format with CLAHE enhancement
-- **Next Phase**: Ready for ML model implementation using modular data loading components
+- **Advanced Preprocessing Features**: Idempotent processing, progress tracking, comprehensive reporting, and command-line interface
+- **Production-Ready Status**: Enhanced preprocessing pipeline verified and tested with real-world medical image datasets
+- **Next Phase**: Ready for ML model implementation using modular data loading components and quality-assessed datasets
 
 ### Unix Philosophy Implementation
 
@@ -183,8 +200,8 @@ The codebase has been refactored to follow Unix philosophy principles:
 │   ├── visualization/         # Clinical interpretability and decision support
 │   │   ├── __init__.py
 │   │   └── clinical_interpretability.py # Grad-CAM and multi-modal decision visualization
-│   ├── preprocessing/         # Image preprocessing with CLAHE enhancement
-│   │   └── image_utils.py     # CLAHE processing and format standardization
+│   ├── preprocessing/         # Enhanced image preprocessing with quality assessment
+│   │   └── image_utils.py     # Production-ready CLAHE processing with comprehensive quality analysis
 │   ├── data_prep.py          # Combined dataset preparation pipeline (stub)
 │   ├── model_train.py        # Cross-dataset training with class-aware augmentation (stub)
 │   ├── model_evaluate.py     # Clinical validation and performance metrics (stub)

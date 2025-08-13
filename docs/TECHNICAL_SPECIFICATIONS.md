@@ -41,7 +41,43 @@ class EarConditionClassifier(nn.Module):
 ```
 
 ### Data Pipeline
-- **Input Size**: 224x224 or 384x384 pixels
+
+#### Enhanced Image Preprocessing (`src/preprocessing/image_utils.py`)
+- **Medical-Grade Enhancement**: LAB color space CLAHE processing optimized for otoscopy images
+- **Quality Assessment Framework**: Comprehensive image quality analysis with automated scoring
+- **Input Standardization**: All images converted to 500x500 PNG format with lossless compression
+- **Color Cast Detection**: Automatic detection of severe (ratio >1.5) and moderate (ratio >1.3) color casts
+- **Exposure Analysis**: Detection of over/under-exposure issues with brightness thresholds
+- **Quality Metrics**: Automated quality scoring on 0-1 scale based on multiple factors
+- **Idempotent Processing**: Safe to run multiple times without reprocessing existing files
+
+#### Preprocessing Command Line Interface
+```bash
+# Basic processing with quality assessment
+python src/preprocessing/image_utils.py
+
+# Strict quality mode - reject images with any quality issues
+python src/preprocessing/image_utils.py --strict-quality
+
+# Custom quality threshold (0-1 scale, default: 0.8)
+python src/preprocessing/image_utils.py --quality-threshold 0.9
+
+# Force reprocessing of existing files
+python src/preprocessing/image_utils.py --force-reprocess
+
+# Verbose output with detailed processing information
+python src/preprocessing/image_utils.py --verbose
+```
+
+#### Quality Assessment Metrics
+- **Color Cast Ratio**: Channel imbalance detection (max_channel/min_channel)
+- **Brightness Analysis**: Overall image brightness with extreme value detection
+- **Exposure Classification**: Over/under-exposure based on pixel value distributions
+- **Quality Score**: Composite score (0-1) incorporating all quality factors
+- **Processing Report**: Comprehensive JSON report with statistics and quality details
+
+#### Training Data Pipeline
+- **Input Size**: 224x224 or 384x384 pixels (resized from standardized 500x500)
 - **Normalization**: ImageNet statistics
 - **Augmentations**: 
   - Rotation (±15°)

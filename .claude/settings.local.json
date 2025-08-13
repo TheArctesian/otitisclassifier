@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(python:*)",
+      "Bash(timeout 10 python src/preprocessing/image_utils.py)",
+      "Bash(timeout 10 python:*)",
+      "Bash(mkdir:*)",
+      "Bash(copy \"data\\raw\\ebasaran-kaggale\\Foreign\\yabancisim_1.tiff\" \"test_data\\raw\\test_images\"\")",
+      "Bash(copy:*)",
+      "Bash(cp:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }
