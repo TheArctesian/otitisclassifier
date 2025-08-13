@@ -1,4 +1,37 @@
-streamlit
-Pillow
-numpy
-scikit-image
+# Web Interface
+streamlit>=1.28.0
+
+# Image Processing & Data Handling
+Pillow>=10.0.0
+numpy>=1.24.0
+scikit-image>=0.21.0
+opencv-python>=4.8.0
+pandas>=2.0.0
+
+# Data Augmentation & Medical Image Processing
+albumentations>=1.3.0
+
+# Machine Learning & Dataset Handling
+torch>=2.0.0
+torchvision>=0.15.0
+scikit-learn>=1.3.0  # Added for train_test_split and metrics
+
+# Configuration Management (Industry Standard)
+hydra-core>=1.3.0
+omegaconf>=2.3.0
+
+# Logging and Utilities
+pathlib2>=2.3.7  # Enhanced path operations
+typing-extensions>=4.0.0  # Better type hints
+
+# Development & Testing
+pytest>=7.0.0  # Testing framework
+pytest-cov>=4.0.0  # Coverage reporting
+
+# Clinical validation dependencies (ready to uncomment)  
+# torchmetrics>=0.11.0
+# grad-cam>=1.4.0
+
+# Deployment dependencies (ready to uncomment)
+# fastapi>=0.103.0
+# uvicorn>=0.23.0

@@ -1,0 +1,103 @@
+# Clinical Integration Configuration for Multi-Modal Diagnostic System
+# High-level configuration for clinical deployment and decision support
+
+clinical_system:
+  # Multi-modal diagnostic weights
+  component_weights:
+    image_classification: 0.40    # This model's contribution
+    symptom_assessment: 0.35      # Patient-reported symptoms  
+    patient_history: 0.25         # Medical history and risk factors
+    
+  # Clinical decision thresholds
+  decision_thresholds:
+    high_confidence_diagnosis: 0.85    # Provide diagnosis with treatment recommendations
+    moderate_confidence_diagnosis: 0.65 # Provide probable diagnosis with monitoring
+    low_confidence_referral: 0.65      # Recommend professional examination
+    
+  # Safety protocols
+  safety:
+    # Always flag for human review
+    critical_conditions:
+      - "Foreign_Bodies"          # Emergency condition
+      - "Acute_Otitis_Media"      # Requires prompt treatment
+      - "Chronic_Otitis_Media"    # May need specialist referral
+      
+    # Conservative thresholds for pathology detection  
+    pathology_sensitivity: 0.95   # Prefer false positives over false negatives
+    normal_specificity: 0.85      # Acceptable false positive rate for normal cases
+
+# Performance requirements for clinical deployment
+performance:
+  # Response time requirements
+  max_inference_time: 3.0        # seconds
+  max_total_processing_time: 5.0  # seconds including preprocessing
+  
+  # Scalability requirements  
+  concurrent_users: 100
+  daily_capacity: 1000           # diagnoses per day
+  
+  # Availability requirements
+  uptime_target: 0.995           # 99.5% availability
+  
+# Clinical validation framework
+validation:
+  # Expert validation requirements
+  expert_review:
+    sample_size: 100             # Cases for expert comparison
+    agreement_threshold: 0.80    # Required concordance with ENT specialists
+    
+  # Cross-dataset validation strategy
+  generalization_testing:
+    external_datasets: ["vanak_figshare"]
+    performance_degradation_threshold: 0.05  # Max acceptable performance drop
+    
+  # Clinical text validation using Sumotosima annotations
+  text_validation:
+    description_matching: true
+    clinical_pattern_verification: true
+
+# Integration specifications (high-level)
+integration:
+  # Input/Output format for multi-modal system
+  input_format:
+    image: "base64_encoded"
+    metadata: "json"
+    
+  output_format:
+    primary_diagnosis: "string"
+    confidence_scores: "array[9]"  # All class probabilities
+    clinical_flags: "array"        # Any safety alerts
+    explanation: "string"          # Brief clinical rationale
+    
+  # API specifications (to be expanded)
+  api:
+    endpoint: "/classify_ear_condition"
+    method: "POST"
+    timeout: 10                    # seconds
+    rate_limit: 100                # requests per minute per user
+
+# Monitoring and logging for clinical deployment
+monitoring:
+  # Performance metrics to track
+  metrics:
+    - "inference_latency"
+    - "prediction_confidence_distribution" 
+    - "class_prediction_rates"
+    - "low_confidence_flagging_rate"
+    
+  # Clinical outcome tracking
+  outcome_tracking:
+    follow_up_period: 30           # days
+    validation_sampling: 0.1       # 10% of cases for outcome verification
+    
+  # Alert conditions
+  alerts:
+    performance_degradation: 0.05  # Drop in accuracy
+    high_uncertainty_rate: 0.20    # Too many low-confidence cases
+    system_latency: 5.0            # seconds
+
+# TODO: Expand multi-modal integration specifications
+# TODO: Define detailed clinical workflow integration  
+# TODO: Add regulatory compliance requirements (FDA, HIPAA)
+# TODO: Specify clinical trial protocol parameters
+# TODO: Define user interface requirements for clinical staff

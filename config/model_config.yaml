@@ -1,0 +1,104 @@
+# Model Architecture Configuration for Clinical Otitis Classification
+# Following industry standards for medical imaging projects
+
+model:
+  # Base architecture options
+  architecture: "densenet121"  # or "resnet50"
+  pretrained_weights: "radimagenet"  # Preferred for medical imaging
+  
+  # Input specifications  
+  input_size: [500, 500, 3]
+  normalization:
+    # TODO: Determine optimal normalization stats
+    # RadImageNet stats (preferred) vs ImageNet stats
+    mean: [0.485, 0.456, 0.406]  # ImageNet default, update for RadImageNet
+    std: [0.229, 0.224, 0.225]   # ImageNet default, update for RadImageNet
+
+  # Architecture modifications
+  output:
+    num_classes: 9
+    activation: "softmax"
+    dropout_rate: 0.5
+    
+  # Transfer learning strategy
+  transfer_learning:
+    freeze_backbone: true
+    unfreeze_schedule:
+      # Progressive unfreezing for medical domain adaptation
+      - epoch: 5
+        layers: ["classifier"]
+      - epoch: 10  
+        layers: ["features.denseblock4"]
+      # TODO: Define complete unfreezing schedule
+
+# Training hyperparameters
+training:
+  # Batch configuration
+  batch_size: 32
+  num_workers: 4
+  
+  # Optimization
+  optimizer: "adamw"
+  learning_rate: 0.001
+  weight_decay: 0.01
+  
+  # Learning rate scheduling
+  scheduler: "cosine_annealing"
+  scheduler_params:
+    T_max: 100
+    eta_min: 0.0001
+    
+  # Training duration
+  max_epochs: 100
+  early_stopping:
+    patience: 10
+    monitor: "val_balanced_accuracy"
+    mode: "max"
+
+# Loss function for severe class imbalance
+loss:
+  type: "focal_loss"  # or "weighted_cross_entropy"
+  focal_loss:
+    alpha: 1.0
+    gamma: 2.0
+  
+  # Class weights (to be calculated from combined dataset)
+  class_weights: null  # TODO: Calculate from actual class distributions
+  
+# Data augmentation strategy
+augmentation:
+  # Base augmentations for all classes
+  base:
+    rotation: 15  # degrees, anatomically plausible
+    horizontal_flip: 0.5
+    brightness: 0.2
+    contrast: 0.2
+    
+  # Class-specific augmentation multipliers
+  class_multipliers:
+    "Foreign_Bodies": 50      # 3 -> 150 images
+    "Pseudo_Membranes": 15    # 11 -> 165 images  
+    "Tympanostomy_Tubes": 10  # 16 -> 160 images
+    # TODO: Define multipliers for all minority classes
+
+# Clinical integration parameters
+clinical:
+  # Multi-modal system weights
+  system_weight: 0.4  # 40% weight in decision tree
+  
+  # Confidence thresholds for clinical decision support
+  confidence_thresholds:
+    high_confidence: 0.85
+    medium_confidence: 0.65
+    low_confidence: 0.65  # Requires human review below this
+    
+  # Performance targets
+  targets:
+    accuracy: 0.90
+    sensitivity_pathology: 0.90  # For pathological conditions
+    specificity_normal: 0.85     # For normal classification
+    inference_time: 3.0          # seconds max
+
+# TODO: Add model ensemble configuration
+# TODO: Add cross-dataset validation parameters  
+# TODO: Define clinical interpretability requirements

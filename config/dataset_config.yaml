@@ -1,0 +1,94 @@
+# Multi-Dataset Configuration for Otitis Classifier
+# Industry standard: Hydra-based configuration management
+
+datasets:
+  # Primary training dataset
+  ebasaran_kaggle:
+    name: "Ebasaran-Kaggle"
+    path: "data/raw/ebasaran-kaggale"
+    processed_path: "data/processed/ebasaran-kaggale"
+    format: "tiff"
+    total_images: 956
+    role: "primary_training"
+    classes:
+      - "Normal"      # 535 images
+      - "Aom"         # 119 images  
+      - "Chornic"     # 63 images
+      - "Earwax"      # 140 images
+      - "Foreign"     # 3 images
+      - "Earventulation" # 16 images
+      # TODO: Add remaining classes with counts
+
+  # High-volume supplementary dataset  
+  uci_kaggle:
+    name: "UCI-Kaggle"
+    path: "data/raw/uci-kaggle"
+    processed_path: "data/processed/uci-kaggle"
+    format: "jpg"
+    estimated_images: 900
+    role: "training_supplement"
+    classes:
+      - "Normal"
+      - "Acute Otitis Media"
+      - "Cerumen Impaction"  
+      - "Chronic Otitis Media"
+      - "Myringosclerosis"
+    # TODO: Map to unified class names
+
+  # External validation dataset
+  vanak_figshare:
+    name: "VanAk-Figshare"
+    path: "data/raw/vanak-figshare"
+    processed_path: "data/processed/vanak-figshare"
+    format: "png"
+    estimated_images: 270
+    role: "external_validation"
+    classes:
+      - "Normal"
+      - "AOM"
+      - "CSOM" 
+      - "Earwax"
+      - "Miringoskleroz"
+      - "OtitisEksterna"
+      - "TympanostomyTubes"
+    # TODO: Map to unified class names
+
+  # Clinical text annotations
+  sumotosima_github:
+    name: "Sumotosima-GitHub"
+    path: "data/raw/sumotosima-github"
+    format: "csv"
+    cases: 38
+    role: "clinical_validation"
+    description: "Expert clinical annotations for interpretation validation"
+
+# Unified class mapping across datasets
+unified_classes:
+  num_classes: 9
+  class_names:
+    - "Normal_Tympanic_Membrane"
+    - "Acute_Otitis_Media"
+    - "Chronic_Otitis_Media"
+    - "Cerumen_Impaction"
+    - "Otitis_Externa"
+    - "Myringosclerosis"
+    - "Tympanostomy_Tubes"
+    - "Foreign_Bodies"
+    - "Pseudo_Membranes"
+
+  # Clinical priority levels for loss weighting
+  clinical_priority:
+    "Normal_Tympanic_Membrane": "baseline"
+    "Acute_Otitis_Media": "critical"
+    "Chronic_Otitis_Media": "high"  
+    "Cerumen_Impaction": "medium"
+    "Otitis_Externa": "medium"
+    "Myringosclerosis": "medium"
+    "Tympanostomy_Tubes": "medium"
+    "Foreign_Bodies": "critical"
+    "Pseudo_Membranes": "low"
+
+# TODO: Complete cross-dataset class mapping
+# TODO: Add exact image counts after data analysis
+# TODO: Define augmentation factors per class
+# TODO: Add validation split strategies
