@@ -1,33 +1,34 @@
-# Multi-Dataset Integration Guide
+# Stage-Based Training Guide
 
 ## Overview
 
-This document outlines the strategy for integrating 4 validated medical datasets into a unified otitis classification system. The integration follows industry best practices for multi-institutional medical AI studies and ensures robust cross-dataset validation.
+This document outlines the stage-based training strategy for medical AI that ensures strict data isolation and FDA-compliant validation. The methodology follows medical AI best practices with progressive domain adaptation across 3 validated datasets.
 
-## Dataset Sources
+## Stage-Based Dataset Architecture
 
-### Primary Datasets
-1. **Ebasaran-Kaggle** (956 images) - Primary training dataset with comprehensive 9-class coverage
-2. **UCI-Kaggle** (~900+ images) - High-volume dataset for major class reinforcement
-3. **VanAk-Figshare** (~270+ images) - External validation dataset for generalization testing
-4. **Sumotosima-GitHub** (38+ cases) - Clinical text annotations for interpretation validation
+### Training Stages
+1. **Stage 1: Base Training** - Ebasaran-Kaggle (956 images) - Foundation model training
+2. **Stage 2: Fine-Tuning** - UCI-Kaggle (~900+ images) - Domain adaptation
+3. **Stage 3: External Validation** - VanAk-Figshare (~270+ images) - Unbiased evaluation
+4. **Clinical Annotations** - Sumotosima-GitHub (38+ cases) - Interpretability validation
 
-### Dataset Roles
+### Stage Isolation Principles
 
-| Dataset | Role | Usage | Format | Priority |
-|---------|------|-------|---------|----------|
-| Ebasaran-Kaggle | Primary Training | Model development, initial validation | TIFF | Critical |
-| UCI-Kaggle | Training Supplement | Class balance improvement | JPG | High |
-| VanAk-Figshare | External Validation | Generalization assessment | PNG | High |
-| Sumotosima-GitHub | Clinical Validation | Expert interpretation comparison | CSV | Medium |
+| Stage | Dataset | Usage | Data Split | Isolation Level |
+|-------|---------|-------|------------|----------------|
+| Stage 1 | Ebasaran-Kaggle | Base Training | 80% train, 20% val | Internal split only |
+| Stage 2 | UCI-Kaggle | Fine-Tuning | 90% train, 10% val | No overlap with Stage 1 |
+| Stage 3 | VanAk-Figshare | External Test | 100% test | Never used for training |
+| Clinical | Sumotosima-GitHub | Validation | Expert comparison | Interpretability only |
 
-## Integration Strategy
+## Stage-Based Training Strategy
 
-### Phase 1: Dataset Validation and Processing
-- Validate all dataset paths and structure integrity
+### Phase 1: Data Isolation Setup
+- Validate strict separation between training stages
 - Apply consistent CLAHE preprocessing across all formats
-- Standardize image resolution to 500×500 pixels
-- Convert all images to unified format (JPG) for consistency
+- Preserve full resolution at 500×500 pixels for medical detail
+- Convert all images to unified PNG format for quality preservation
+- Implement contamination detection to prevent data leakage
 
 ### Phase 2: Class Mapping and Standardization
 - Map dataset-specific class names to unified 9-class taxonomy

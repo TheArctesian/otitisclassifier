@@ -4,7 +4,7 @@
 
 This documentation provides comprehensive guidance for developing and implementing a multi-modal ear infection/disease diagnosis system. The system combines image classification, symptom assessment, and patient history through a decision tree framework to provide evidence-based diagnostic recommendations.
 
-**🆕 Current Status**: The image classification component has been implemented with a **modular, Unix philosophy-based architecture** featuring 2,363 processed PNG images across 9 ear conditions. See the main `README.md` and `CLAUDE.md` for development details.
+**🆕 Current Status**: The image classification component has been implemented with a **stage-based medical AI training architecture** featuring 2,363 processed PNG images at 500x500 resolution across 9 ear conditions. See the main `README.md` and `CLAUDE.md` for development details.
 
 ## Documentation Structure
 

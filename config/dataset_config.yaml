@@ -1,15 +1,20 @@
-# Multi-Dataset Configuration for Otitis Classifier
-# Industry standard: Hydra-based configuration management
+# Stage-Based Training Configuration for Otitis Classifier
+# Medical AI best practices: Strict data isolation across training stages
 
 datasets:
-  # Primary training dataset
+  # Stage 1: Base Training Dataset
   ebasaran_kaggle:
     name: "Ebasaran-Kaggle"
     path: "data/raw/ebasaran-kaggale"
     processed_path: "data/processed/ebasaran-kaggale"
     format: "tiff"
     total_images: 956
-    role: "primary_training"
+    role: "base_training"
+    stage: 1
+    split_ratio:
+      train: 0.8
+      val: 0.2
+    augmentation_strength: "aggressive"
     classes:
       - "Normal"      # 535 images
       - "Aom"         # 119 images  
@@ -19,14 +24,19 @@ datasets:
       - "Earventulation" # 16 images
       # TODO: Add remaining classes with counts
 
-  # High-volume supplementary dataset  
+  # Stage 2: Fine-Tuning Dataset
   uci_kaggle:
     name: "UCI-Kaggle"
     path: "data/raw/uci-kaggle"
     processed_path: "data/processed/uci-kaggle"
     format: "jpg"
     estimated_images: 900
-    role: "training_supplement"
+    role: "fine_tuning"
+    stage: 2
+    split_ratio:
+      train: 0.9
+      val: 0.1
+    augmentation_strength: "conservative"
     classes:
       - "Normal"
       - "Acute Otitis Media"
@@ -35,7 +45,7 @@ datasets:
       - "Myringosclerosis"
     # TODO: Map to unified class names
 
-  # External validation dataset
+  # Stage 3: External Validation Dataset
   vanak_figshare:
     name: "VanAk-Figshare"
     path: "data/raw/vanak-figshare"
@@ -43,6 +53,11 @@ datasets:
     format: "png"
     estimated_images: 270
     role: "external_validation"
+    stage: 3
+    split_ratio:
+      test: 1.0
+    augmentation_strength: "none"
+    data_isolation: "strict"  # Never used for training
     classes:
       - "Normal"
       - "AOM"
@@ -53,14 +68,15 @@ datasets:
       - "TympanostomyTubes"
     # TODO: Map to unified class names
 
-  # Clinical text annotations
+  # Clinical Interpretability Validation
   sumotosima_github:
     name: "Sumotosima-GitHub"
     path: "data/raw/sumotosima-github"
     format: "csv"
     cases: 38
-    role: "clinical_validation"
-    description: "Expert clinical annotations for interpretation validation"
+    role: "interpretability_validation"
+    stage: "post_training"
+    description: "Expert clinical annotations for model interpretation validation"
 
 # Unified class mapping across datasets
 unified_classes:
@@ -88,7 +104,37 @@ unified_classes:
     "Foreign_Bodies": "critical"
     "Pseudo_Membranes": "low"
 
-# TODO: Complete cross-dataset class mapping
-# TODO: Add exact image counts after data analysis
-# TODO: Define augmentation factors per class
-# TODO: Add validation split strategies
+# Stage-Based Training Pipeline
+training_pipeline:
+  stages:
+    - name: "base_training"
+      dataset: "ebasaran_kaggle"
+      objective: "Foundation model training with comprehensive class coverage"
+      image_size: 500
+      use_radimagenet: true
+      
+    - name: "fine_tuning"
+      dataset: "uci_kaggle" 
+      objective: "Domain adaptation on different institutional source"
+      image_size: 500
+      use_radimagenet: true
+      
+    - name: "external_validation"
+      dataset: "vanak_figshare"
+      objective: "Unbiased evaluation on completely external dataset"
+      image_size: 500
+      use_radimagenet: true
+
+# Data Isolation Validation
+isolation_rules:
+  strict_separation: true
+  contamination_detection: true
+  cross_stage_validation: false
+  external_test_protection: true
+
+# Image Processing Standards
+processing:
+  target_resolution: 500  # Full medical image detail preservation
+  format: "png"  # Lossless medical imaging
+  enhancement: "clahe"  # Medical-grade contrast enhancement
+  quality_threshold: 0.8

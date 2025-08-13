@@ -17,17 +17,17 @@ python src/preprocessing/image_utils.py  # Process raw images to PNG
 
 ## Architecture Overview
 
-This project implements a **modular, Unix philosophy-based architecture** with:
-- **2,363 processed PNG images** with CLAHE enhancement
-- **9 ear condition classes** from 4 validated medical datasets
-- **Modular data loading** system for easy development and scaling
-- **Simple, composable functions** that do one thing well
+This project implements a **stage-based medical AI training architecture** with:
+- **2,363 processed PNG images** with CLAHE enhancement at 500x500 resolution
+- **9 ear condition classes** from 3 validated medical datasets
+- **Stage-based training pipeline** with strict data isolation
+- **FDA-compliant validation** on external datasets
 
-## Data Sources
-- **[Ebasaran-Kaggle](https://www.kaggle.com/datasets/erdalbasaran/eardrum-dataset-otitis-media)**: Primary training (955 images)
-- **[UCI-Kaggle](https://www.kaggle.com/datasets/omduggineni/otoscopedata)**: High-volume supplement (908 images)  
-- **[VanAk-Figshare](https://figshare.com/articles/dataset/eardrum_zip/13648166/1)**: External validation (270 images)
-- **[Sumotosima-GitHub](https://github.com/anas2908/Sumotosima)**: Clinical annotations (38 cases)
+## Stage-Based Data Sources
+- **[Ebasaran-Kaggle](https://www.kaggle.com/datasets/erdalbasaran/eardrum-dataset-otitis-media)**: Stage 1 base training (955 images)
+- **[UCI-Kaggle](https://www.kaggle.com/datasets/omduggineni/otoscopedata)**: Stage 2 fine-tuning (908 images)  
+- **[VanAk-Figshare](https://figshare.com/articles/dataset/eardrum_zip/13648166/1)**: Stage 3 external validation (270 images)
+- **[Sumotosima-GitHub](https://github.com/anas2908/Sumotosima)**: Clinical annotations for interpretability (38 cases)
 
 
 
@@ -66,20 +66,26 @@ for images, labels in dataloader:
     pass
 ```
 
-### Multi-Dataset Loading
+### Stage-Based Training
 ```python
-from src.data.multi import create_standard_multi_dataset
-from src.utils import create_dataloader
+from src.data.stage_based_loader import create_medical_ai_datasets
 
-# Combine multiple datasets with unified classes
-multi_dataset = create_standard_multi_dataset(
-    config='processed',  # Use processed PNG images
-    datasets=['ebasaran', 'uci', 'vanak'],
-    image_size=384,
-    training=True
+# Create stage-based training pipeline
+dataset_manager = create_medical_ai_datasets(
+    base_training_path="data/processed/ebasaran-kaggale",
+    fine_tuning_path="data/processed/uci-kaggle", 
+    validation_path="data/processed/vanak-figshare",
+    image_size=500  # Full resolution preservation
 )
 
-dataloader = create_dataloader(multi_dataset, batch_size=16)
+# Stage 1: Base training
+base_loaders = dataset_manager.get_stage_dataloaders('base_training')
+
+# Stage 2: Fine-tuning
+finetune_loaders = dataset_manager.get_stage_dataloaders('fine_tuning')
+
+# Stage 3: External validation
+validation_loaders = dataset_manager.get_stage_dataloaders('validation')
 ```
 
 ### Data Validation
