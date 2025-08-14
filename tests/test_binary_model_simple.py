@@ -10,10 +10,15 @@ import sys
 import logging
 import torch
 import numpy as np
+import tempfile
+import os
 from pathlib import Path
 
-# Add src to path for imports
-sys.path.append(str(Path(__file__).parent.parent / "src"))
+# Add src to path for imports - works for both runtime and IDE
+project_root = Path(__file__).parent.parent
+src_path = project_root / "src"
+if str(src_path) not in sys.path:
+    sys.path.insert(0, str(src_path))
 
 # Configure logging
 logging.basicConfig(
@@ -34,6 +39,7 @@ def test_model_imports():
         return True
     except Exception as e:
         logger.error(f"✗ Import failed: {e}")
+        logger.error(f"Python path: {sys.path}")
         return False
 
 
@@ -275,9 +281,12 @@ def test_model_save_load(model):
     """Test model save and load functionality."""
     logger.info("=== Testing Model Save/Load ===")
     
+    # Create temporary file for model saving
+    with tempfile.NamedTemporaryFile(suffix='.pt', delete=False) as temp_file:
+        save_path = temp_file.name
+    
     try:
-        # Save model
-        save_path = "test_binary_model_temp.pt"
+        # Save model to temporary file
         torch.save(model.state_dict(), save_path)
         
         # Create new model and load weights
@@ -297,17 +306,23 @@ def test_model_save_load(model):
             diff = torch.abs(original_output - loaded_output).max()
             assert diff < 1e-5, f"Loaded model output differs too much: {diff}"
         
-        # Clean up
-        Path(save_path).unlink()
-        
         logger.info(f"✓ Model save/load successful")
         logger.info(f"  Max difference: {diff:.2e}")
+        logger.info(f"  Temporary file used: {save_path}")
         
         return True
         
     except Exception as e:
         logger.error(f"✗ Model save/load failed: {e}")
         return False
+        
+    finally:
+        # Always clean up temporary file
+        try:
+            os.unlink(save_path)
+            logger.debug(f"Cleaned up temporary file: {save_path}")
+        except OSError:
+            logger.warning(f"Could not clean up temporary file: {save_path}")
 
 
 def main():

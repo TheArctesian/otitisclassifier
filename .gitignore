@@ -16,6 +16,25 @@ ENV/
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+
+# Python distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
 # OS files
 .DS_Store
@@ -36,3 +55,29 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# ML/AI specific
+*.pt
+*.pth
+*.ckpt
+*.pkl
+*.pickle
+wandb/
+mlruns/
+checkpoints/
+.neptune/
+.tensorboard/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.cache
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Logs
+*.log
+logs/
