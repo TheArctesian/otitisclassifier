@@ -1,0 +1,60 @@
+# Multi-Class Diagnostic Model Training Configuration
+# Stage 2 of Dual-Architecture Medical AI System
+
+# Model architecture configuration
+model:
+  num_pathology_classes: 8              # 8 pathological classes (excluding Normal)
+  pretrained: true                      # Use ImageNet pretrained weights
+  radimagenet_weights: true             # Attempt RadImageNet if available
+  color_feature_fusion: true            # Enable LAB color feature integration (18 features)
+  regional_attention: true              # Enable regional attention mechanisms
+  dropout_rate: 0.4                     # Main classifier dropout for regularization
+  attention_dropout: 0.2                # Attention mechanism dropout
+  confidence_threshold: 0.7             # Clinical decision threshold
+
+# Training configuration
+training:
+  batch_size: 16                        # Smaller batch size for diagnostic model
+  learning_rate: 1e-4                   # Conservative learning rate for medical AI
+  weight_decay: 1e-4                    # Weight decay for regularization
+  num_workers: 4                        # Data loading workers
+  min_epochs: 20                        # Minimum training epochs before early stopping
+  max_epochs: 100                       # Maximum training epochs
+  patience: 15                          # Early stopping patience
+  scheduler_t0: 10                      # Cosine annealing warm restart T_0
+  scheduler_tmult: 2                    # Cosine annealing T_mult
+  min_learning_rate: 1e-6               # Minimum learning rate
+
+# Clinical safety thresholds
+clinical:
+  balanced_accuracy_threshold: 0.85     # Minimum required balanced accuracy
+  rare_class_sensitivity_threshold: 0.80 # Minimum sensitivity for rare classes (Pseudo Membranes, Foreign Bodies)
+
+# Data configuration
+data:
+  base_training_path: "data/processed/ebasaran-kaggale"     # Primary training dataset
+  fine_tuning_path: "data/processed/uci-kaggle"            # Fine-tuning dataset  
+  validation_path: "data/processed/vanak-figshare"         # External validation dataset
+  image_size: 500                       # Full resolution preservation
+  dual_architecture: true              # Enable dual architecture data routing
+
+# Rare pathology handling
+rare_pathology:
+  aggressive_augmentation: true         # Enable aggressive augmentation for rare classes
+  pseudo_membranes_boost: 1.5          # Additional class weight boost for Pseudo Membranes
+  foreign_bodies_boost: 2.0            # Additional class weight boost for Foreign Bodies
+  curriculum_learning: true            # Progressive difficulty training
+
+# Clinical integration
+clinical_integration:
+  specialist_referral_threshold: 0.7   # Threshold for specialist referral recommendation
+  urgent_attention_threshold: 0.6      # Threshold for urgent attention flags
+  high_confidence_threshold: 0.85      # High confidence diagnosis threshold
+  enable_regional_visualization: true  # Enable anatomical region visualization
+
+# Output configuration
+output:
+  save_checkpoints: true               # Save model checkpoints
+  plot_training_history: true         # Generate training plots
+  save_best_model: true               # Save best performing model
+  generate_clinical_report: true      # Generate clinical validation report

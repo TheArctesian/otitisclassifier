@@ -10,7 +10,8 @@
       "Bash(copy:*)",
       "Bash(cp:*)",
       "Bash(rm:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(set PYTHONPATH=C:Usersnicocotitisclassifierotitisclassifier)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
