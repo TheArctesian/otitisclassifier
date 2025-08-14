@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an enhanced otitis and ear conditions classifier project that analyzes medical images of ear pathologies using a **dual architecture approach**. The application uses Streamlit to provide a web interface for a comprehensive dual-model classification system of various ear conditions. This dual image classifier serves as a core component (40% weight) in a larger multi-modal diagnostic system that combines enhanced image analysis, symptom assessment, and patient history for comprehensive ear condition diagnosis.
+This is a comprehensive multi-modal ear infection diagnosis system that combines three key components: **Enhanced Image Classification with Color Features and Regional Analysis**, **Symptom Assessment via iPad interface**, and **Patient History Integration**. The enhanced dual architecture image classification system serves as a core component (40% weight) in the larger multi-modal diagnostic system that uses decision tree logic to combine all inputs and provide evidence-based diagnostic recommendations with anatomical region-specific insights.
 
 ## Essential Commands
 
@@ -80,32 +80,34 @@ dataloader = create_dataloader(dataset, batch_size=32, shuffle=True)
 
 ### Core Components
 - **`app/app.py`**: Main Streamlit application with dual model integration logic
-- **`src/`**: Contains enhanced Python modules for dual architecture:
-  - `models/binary_screening.py`: Binary screening model (Normal vs Pathological)
-  - `models/multiclass_diagnostic.py`: Multi-class diagnostic model (8 pathological classes)
-  - `models/dual_integration.py`: Dual model integration and decision logic
-  - `data_prep.py`: Enhanced data preprocessing for dual architecture
-  - `model_train.py`: Dual model training pipeline
-  - `model_evaluate.py`: Enhanced dual model evaluation and clinical metrics
-  - `utils.py`: Enhanced utility functions for dual architecture
+- **`src/`**: Contains enhanced Python modules for dual architecture with color-regional features:
+  - `models/binary_screening.py`: Binary screening model with color feature integration
+  - `models/multiclass_diagnostic.py`: Multi-class diagnostic model with regional localization
+  - `models/dual_integration.py`: Dual model integration with color-regional evidence combination
+  - `features/color_extraction.py`: Color feature extraction pipeline with LAB color space processing
+  - `features/regional_analysis.py`: Regional anatomical analysis framework with attention mechanisms
+  - `data_prep.py`: Enhanced data preprocessing with color-preserved augmentation
+  - `model_train.py`: Dual model training pipeline with color-regional feature fusion
+  - `model_evaluate.py`: Enhanced dual model evaluation with clinical metrics and regional scoring
+  - `utils.py`: Enhanced utility functions for color-regional dual architecture
 - **`data/`**: Enhanced multi-source medical image datasets (~2,000+ images total) optimized for dual architecture training
 
 ### Enhanced Dual Architecture Training Framework
 The project implements enhanced medical AI best practices with **dual model architecture** using strict data isolation across training stages with 3 validated datasets (~2,000+ total images):
 
 **Binary Screening Model (Stage 1)**
-- **Purpose**: High-sensitivity pathology detection (Normal vs Pathological)
+- **Purpose**: High-sensitivity pathology detection with color and regional feature support
 - **Target Performance**: 98%+ sensitivity, 90%+ specificity
-- **Training Data**: Complete dataset (2,000+ images from all sources)
-- **Clinical Role**: Initial screening to catch all potential pathologies
-- **Safety Focus**: Minimize false negatives through conservative thresholds
+- **Training Data**: Complete dataset with color normalization and regional annotations
+- **Enhanced Features**: Color channel analysis, regional attention mechanisms
+- **Clinical Role**: Initial screening with anatomical region-specific alerts
 
 **Multi-Class Diagnostic Model (Stage 2)**
-- **Purpose**: Specific pathology identification among 8 pathological classes
+- **Purpose**: Specific pathology identification with color pattern matching and regional localization
 - **Target Performance**: 85%+ balanced accuracy, 80%+ sensitivity for rare classes
-- **Training Data**: Pathological cases only with aggressive augmentation
-- **Clinical Role**: Detailed diagnosis after positive screening
-- **Specialization**: Optimized for rare pathology detection
+- **Training Data**: Pathological cases with color-preserved augmentation and regional masks
+- **Enhanced Features**: Color histogram analysis, texture-color fusion, regional feature maps
+- **Clinical Role**: Detailed diagnosis with anatomical localization and color-based confidence
 
 **Stage 1: Base Training**
 - **Ebasaran-Kaggle** (956 images): Primary training dataset with comprehensive 9 ear conditions
@@ -152,12 +154,14 @@ The dual system classifies conditions with enhanced clinical priorities and dual
 - Albumentations for medical-grade data augmentation with dual model optimization
 - Pandas for dataset management and clinical annotations
 - Hydra + OmegaConf for industry-standard configuration management
-- **Enhanced ML Stack** (for dual architecture implementation):  
-  - PyTorch for dual model deep learning architecture
-  - timm for EfficientNet variants (B3 for screening, B4 for diagnostic)
-  - Medical imaging libraries for multi-format support
-  - TorchMetrics for clinical validation and dual model evaluation
-  - Grad-CAM for dual model interpretability
+- **Enhanced ML Stack** (for dual architecture with color-regional features):  
+  - PyTorch for dual model deep learning architecture with color-regional feature fusion
+  - timm for EfficientNet variants (B3 for screening, B4 for diagnostic) with multi-scale processing
+  - Medical imaging libraries for multi-format support and color space conversions
+  - TorchMetrics for clinical validation with regional performance metrics
+  - Grad-CAM for dual model interpretability with anatomical region visualization
+  - scikit-image for LAB color space processing and CLAHE enhancement
+  - OpenCV for regional segmentation and anatomical landmark detection
 
 ### Current Enhanced State
 - **Dual Architecture Training Pipeline**: Complete medical AI dual model training architecture with strict data isolation
@@ -171,7 +175,7 @@ The dual system classifies conditions with enhanced clinical priorities and dual
 - **Container Optimization**: Docker configuration ready for dual model clinical deployment
 - **Progressive Training Strategy**: Binary screening → Multi-class diagnostic → Integrated validation methodology
 - **Production-Ready Status**: Dual architecture pipeline verified with real-world medical image datasets
-- **Next Phase**: Ready for dual model implementation with proper data isolation, clinical validation, and integrated decision making
+- **Next Phase**: Ready for enhanced dual model implementation with color-regional features, multi-modal integration, and clinical decision support system
 
 ### Unix Philosophy Implementation for Dual Architecture
 
@@ -210,33 +214,37 @@ The codebase has been enhanced to follow Unix philosophy principles with dual mo
 - **Differential Augmentation**: Model-specific augmentation strategies (conservative for screening, aggressive for rare class diagnosis)
 - **Clinical Decision Support**: Integration ready for multi-modal diagnostic system (40% weight component) with dual model confidence calibration
 
-### Enhanced Clinical Integration Context
-- **Multi-Modal System Component**: Dual architecture image classification provides 40% weight in comprehensive diagnostic system
-- **Enhanced Performance Targets**: Binary screening >98% sensitivity, Multi-class >85% balanced accuracy, 99.9% uptime for clinical deployment
+### Enhanced Clinical Integration Context with Multi-Modal Features
+- **Multi-Modal System Component**: Enhanced dual architecture image classification with color-regional features provides 40% weight in comprehensive diagnostic system
+- **Decision Tree Integration**: Color-weighted evidence combination with regional confidence scoring for clinical decision support
+- **Enhanced Performance Targets**: Binary screening >98% sensitivity with regional pathology detection >95%, Multi-class >85% balanced accuracy with color pattern recognition >85%, 99.9% uptime for clinical deployment
+- **Anatomical Visualization**: Regional finding maps with color-based pathology indicators for clinical interpretation
 
-### Enhanced User Experience
-- **Clinical Workflow Integration**: 85% satisfaction rating with dual model system
-- **Diagnostic Speed Improvement**: 50% reduction in time to diagnosis
-- **False Referral Reduction**: Measurable decrease in unnecessary specialist referrals
+### Enhanced User Experience with Visual Intelligence
+- **Clinical Workflow Integration**: 85% satisfaction rating with color-regional visual features
+- **Diagnostic Speed Improvement**: 50% reduction in time to diagnosis with enhanced accuracy
+- **False Referral Reduction**: Measurable decrease in unnecessary specialist referrals through enhanced specificity
+- **Visual Interpretation Satisfaction**: >90% clinician satisfaction with color-regional visualizations
+- **Anatomical Accuracy Recognition**: >85% clinician agreement with automated regional findings
 
 ## Enhanced Risk Mitigation for Dual Architecture
 
-### Enhanced Medical/Legal Risks
-- **Dual Model Validation**: Independent verification of both screening and diagnostic models
-- **Conservative Thresholds**: Enhanced safety margins for clinical decisions
-- **Automatic Referral Protocols**: Systematic specialist consultation for high-risk cases
-- **Continuous Monitoring**: Real-time performance tracking with alert systems for both models
+### Enhanced Medical/Legal Risks with Advanced Validation
+- **Triple Model Validation**: Independent verification of screening, diagnostic, and color-regional models
+- **Enhanced Conservative Thresholds**: Color-regional validated safety margins for clinical decisions
+- **Anatomical-Specific Referral Protocols**: Regional finding-based specialist consultation algorithms
+- **Continuous Multi-Modal Monitoring**: Real-time performance tracking with color-regional alert systems
 
-### Enhanced Technical Risks
-- **Cross-Dataset Validation**: Rigorous testing across multiple institutional sources
-- **Bias Detection**: Systematic evaluation across demographic groups for both models
-- **Model Degradation Monitoring**: Early warning systems for performance decline
-- **Fallback Protocols**: Graceful degradation when confidence thresholds not met
+### Enhanced Technical Risks with Robust Multi-Feature Processing
+- **Cross-Dataset Color Validation**: Rigorous color consistency testing across multiple institutional sources
+- **Regional Analysis Bias Detection**: Systematic evaluation of anatomical bias across demographic groups
+- **Multi-Modal Degradation Monitoring**: Early warning systems for color-regional processing performance decline
+- **Enhanced Fallback Protocols**: Graceful degradation when color-regional confidence thresholds not met
 
-## Next Steps for Dual Architecture Implementation
+## Next Steps for Enhanced Dual Architecture Implementation with Color-Regional Features
 
-1. **Implement Dual Architecture**: Begin parallel training of binary screening and multi-class diagnostic models
-2. **Clinical Expert Integration**: Engage ENT specialists for enhanced dual model validation protocols
-3. **Curriculum Learning Deployment**: Execute progressive difficulty training schedule for both models
-4. **Safety Protocol Validation**: Comprehensive testing of dual model clinical decision pathways
-5. **Regulatory Preparation**: Enhanced documentation for medical device compliance with dual architecture
+1. **Implement Enhanced Dual Architecture**: Begin parallel training with color-regional feature integration
+2. **Clinical Expert Integration**: Engage ENT specialists for color-regional model validation protocols
+3. **Enhanced Curriculum Learning**: Execute progressive difficulty training including color and regional complexity
+4. **Multi-Modal Safety Protocol Validation**: Comprehensive testing of color-regional clinical decision pathways
+5. **Advanced Regulatory Preparation**: Enhanced documentation for medical device compliance with multi-modal features

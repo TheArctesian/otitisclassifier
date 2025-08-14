@@ -1,8 +1,8 @@
-# Decision Tree Framework for Ear Diagnosis System
+# Decision Tree Framework for Enhanced Multi-Modal Ear Diagnosis System
 
 ## Overview
 
-The decision tree framework combines image classification, symptom assessment, and patient history to provide evidence-based diagnostic recommendations. This multi-modal approach mimics clinical decision-making processes used by ENT specialists.
+The enhanced decision tree framework combines **Enhanced Image Classification with Color Features and Regional Analysis**, **Symptom Assessment via iPad interface**, and **Patient History Integration** to provide evidence-based diagnostic recommendations with anatomical region-specific insights. This multi-modal approach with color-regional intelligence mimics clinical decision-making processes used by ENT specialists.
 
 ## Framework Architecture
 
@@ -28,26 +28,35 @@ graph TD
     H --> L[Referral Decision]
 ```
 
-## Component 1: Image Classification Evidence
+## Component 1: Enhanced Image Classification Evidence with Color-Regional Features
 
-### Confidence Scoring
+### Enhanced Confidence Scoring with Color-Regional Integration
 ```python
-def calculate_image_evidence(predictions):
+def calculate_enhanced_image_evidence(screening_result, diagnostic_result, color_features, regional_analysis):
     """
-    Convert model predictions to evidence strength
+    Convert dual model predictions with color-regional features to evidence strength
     
     Args:
-        predictions: Dict of class probabilities
+        screening_result: Binary screening model output
+        diagnostic_result: Multi-class diagnostic model output  
+        color_features: Color feature extraction results
+        regional_analysis: Regional anatomical analysis results
         
     Returns:
-        dict: Evidence scores and confidence metrics
+        dict: Enhanced evidence scores with color-regional confidence metrics
     """
-    max_prob = max(predictions.values())
-    top_class = max(predictions, key=predictions.get)
+    # Combine dual model scores
+    image_score = combine_dual_model_scores(screening_result, diagnostic_result) * 0.30
     
-    # Confidence categories
-    if max_prob >= 0.85:
-        confidence_level = "HIGH"
+    # Add color-regional evidence
+    color_score = calculate_color_pathology_correlation(color_features, diagnostic_result['top_prediction']) * 0.10
+    regional_score = calculate_regional_pathology_correlation(regional_analysis, diagnostic_result['top_prediction']) * 0.10
+    
+    combined_confidence = image_score + color_score + regional_score
+    
+    # Enhanced confidence categories with color-regional validation
+    if combined_confidence >= 0.90:
+        confidence_level = "HIGH_WITH_ANATOMICAL_CONFIRMATION"
         evidence_weight = 1.0
     elif max_prob >= 0.65:
         confidence_level = "MEDIUM" 

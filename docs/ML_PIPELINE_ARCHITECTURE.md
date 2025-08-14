@@ -1,6 +1,6 @@
 ## Overview
 
-This document outlines the enhanced machine learning pipeline architecture for dual architecture ear condition classification, implementing parallel hierarchical classification with binary screening and multi-class diagnostic models optimized for clinical deployment.
+This document outlines the enhanced machine learning pipeline architecture for dual architecture ear condition classification with **Color Features and Regional Analysis**, implementing parallel hierarchical classification with binary screening and multi-class diagnostic models with color-regional feature integration optimized for clinical deployment.
 
 ## Enhanced Dual Architecture Framework
 
@@ -17,10 +17,10 @@ graph TB
     %% Enhanced Data Preparation Phase
     subgraph DP["🔧 Enhanced Dual Architecture Data Pipeline"]
         DP1["Format StandardizationTIFF/JPG/PNG → UnifiedDual Model Optimization"]
-        DP2["Medical-Grade CLAHELAB Color Space EnhancementDual Model Quality Assessment"]
+        DP2["Medical-Grade CLAHE + Color FeaturesLAB Color Space EnhancementColor Pattern ExtractionDual Model Quality Assessment"]
         DP3["Multi-Scale Resize224×224, 384×384, 500×500Dual Model Processing"]
         DP4["Dual Architecture Class MappingBinary: Normal vs PathologicalMulti-Class: 8 Pathology Classes"]
-        DP5["Stage-Based Dual SplittingScreening: All DataDiagnostic: Pathological Only"]
+        DP5["Regional Analysis + Color-Regional SplittingAnatomical Landmark DetectionMulti-Scale Regional FeaturesScreening: All Data + Regional AnnotationDiagnostic: Pathological + Color Features"]
     end
 
     %% Enhanced Class Distribution for Dual Architecture
@@ -29,24 +29,24 @@ graph TB
         CD2["Diagnostic Model ClassesCommon: AOM ~700+, Earwax ~400+Moderate: CSOM ~80+, Externa ~60+Rare: Foreign Bodies 3, Pseudo 11"]
         CD3["Critical Dual FocusScreening: 98%+ SensitivityDiagnostic: 80%+ Rare Class DetectionCombined: Normal: Conservative 2xPathological: Moderate 3xFocus: Sensitivity Preservation"]
         AUG2["Diagnostic Model AugmentationForeign Bodies: Aggressive 20x (3→60)Pseudo Membranes: Specialized 10x (11→110)Common: Conservative 2x"]
-        AUG3["Medical-Grade Techniques-  Pathology-preserving transforms-  Conservative rotation (±15°)-  Clinical lighting variations-  Anatomical structure preservation"]
+        AUG3["Medical-Grade Color-Regional Techniques-  Pathology-preserving transforms with color preservation-  Conservative rotation (±15°) with anatomical consistency-  Clinical lighting variations with color channel analysis-  Anatomical structure preservation with regional landmarks-  Color-specific augmentation (inflammation enhancement, discharge variation)-  Regional attention-guided augmentation"]
         AUG4["Curriculum Learning Integration-  Week 1-2: Clear cases-  Week 3-4: Challenging cases-  Week 5-6: Rare pathologies-  Progressive difficulty introduction"]
     end
 
-    %% Enhanced Dual Model Architecture
-    subgraph MA["🧠 Dual Architecture Framework"]
-        MA1["Binary Screening ModelEfficientNet-B3Normal vs Pathological98%+ Sensitivity Target"]
-        MA2["Multi-Class Diagnostic ModelEfficientNet-B4 + Multi-Scale8 Pathology Classes85%+ Balanced Accuracy"]
-        MA3["Attention Fusion LayerMulti-Resolution Feature FusionClinical Region FocusCross-Model Validation"]
-        MA4["Uncertainty QuantificationMonte Carlo DropoutConfidence CalibrationClinical Decision Support"]
+    %% Enhanced Dual Model Architecture with Color-Regional Features
+    subgraph MA["🧠 Enhanced Dual Architecture Framework"]
+        MA1["Binary Screening Model + Color FeaturesEfficientNet-B3 + Color Channel AnalysisNormal vs Pathological + Regional Attention98%+ Sensitivity + Regional Detection >95%"]
+        MA2["Multi-Class Diagnostic Model + Regional AnalysisEfficientNet-B4 + Multi-Scale + Color Histogram8 Pathology Classes + Regional Localization85%+ Balanced Accuracy + Color Pattern >85%"]
+        MA3["Color-Regional Fusion LayerMulti-Resolution Feature FusionColor-Regional Attention MechanismsClinical Region Focus + Color Pattern MatchingCross-Model Validation with Anatomical Consistency"]
+        MA4["Enhanced Uncertainty QuantificationMonte Carlo Dropout + Color-Regional ConfidenceConfidence Calibration with Anatomical ValidationClinical Decision Support + Regional Finding Maps"]
     end
 
     %% Enhanced Training Strategy for Dual Architecture
     subgraph TS["🎯 Dual Architecture Training Strategy"]
-        TS1["Adaptive Loss FunctionsScreening: High Sensitivity FocusDiagnostic: Balanced + Rare ClassDynamic Gamma Values"]
-        TS2["Progressive TrainingStage 1: Screening FoundationStage 2: Diagnostic SpecializationStage 3: Integrated Optimization"]
-        TS3["Cross-Dataset Fine-TuningDomain AdaptationInstitution GeneralizationPerformance Consistency"]
-        TS4["Curriculum LearningDifficulty ProgressionExpert Case ValidationContinuous Improvement"]
+        TS1["Enhanced Adaptive Loss FunctionsScreening: High Sensitivity + Regional FocusDiagnostic: Balanced + Rare Class + Color FeaturesDynamic Gamma Values + Color-Regional Weighting"]
+        TS2["Progressive Color-Regional TrainingStage 1: Screening Foundation + Color IntegrationStage 2: Diagnostic Specialization + Regional AnalysisStage 3: Integrated Color-Regional Optimization"]
+        TS3["Cross-Dataset Fine-Tuning with Color ConsistencyDomain Adaptation + Color NormalizationInstitution Generalization + Regional ValidationPerformance Consistency + Color Pattern Matching"]
+        TS4["Enhanced Curriculum LearningColor-Regional Difficulty ProgressionExpert Case Validation + Anatomical AgreementContinuous Improvement + Clinical Integration"]
     end
 
     %% Enhanced Validation & Clinical Metrics

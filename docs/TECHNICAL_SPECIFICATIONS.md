@@ -1,13 +1,16 @@
-# Technical Specifications - Enhanced Multi-Modal Ear Diagnosis System
+# Technical Specifications - Enhanced Multi-Modal Ear Diagnosis System with Color Features and Regional Analysis
 
 ## Enhanced System Requirements
 
-### Enhanced Performance Requirements
-- **Binary Screening Model**: 95% for pathological conditions
-- **Overall System Specificity**: >88% for normal conditions
-- **Cross-Dataset Consistency**: 1.5) and moderate (ratio >1.3) color casts
-- **Exposure Analysis**: Detection of over/under-exposure issues with brightness thresholds
-- **Multi-Scale Support**: Processing pipeline supports 224×224, 384×384, 500×500 resolutions
+### Enhanced Performance Requirements with Color-Regional Features
+- **Binary Screening Model**: 98%+ sensitivity with regional pathology detection accuracy ≥95%
+- **Multi-Class Diagnostic Model**: 85%+ balanced accuracy with color pattern recognition ≥85%
+- **Color Feature Extraction**: LAB color space processing with pathology-specific pattern analysis
+- **Regional Analysis**: Anatomical landmark detection with multi-scale regional feature extraction
+- **Cross-Dataset Consistency**: 99.9% uptime with color consistency validation across institutional sources
+- **Color Cast Detection**: Advanced detection of severe (ratio >1.5) and moderate (ratio >1.3) color casts
+- **Exposure Analysis**: Detection of over/under-exposure issues with brightness thresholds and color channel analysis
+- **Multi-Scale Support**: Processing pipeline supports 224×224, 384×384, 500×500 resolutions with color preservation
 
 #### Enhanced Training Pipeline Configuration
 

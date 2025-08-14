@@ -1,22 +1,24 @@
-# Enhanced Dual Architecture Stage-Based Training Guide
+# Enhanced Dual Architecture Stage-Based Training Guide with Color Features and Regional Analysis
 
 ## Overview
 
-This document outlines the enhanced stage-based training strategy for dual architecture medical AI that ensures strict data isolation and FDA-compliant validation. The methodology follows medical AI best practices with **parallel hierarchical classification** using binary screening and multi-class diagnostic models across 3 validated datasets.
+This document outlines the enhanced stage-based training strategy for dual architecture medical AI with **Color Features and Regional Analysis** that ensures strict data isolation and FDA-compliant validation. The methodology follows medical AI best practices with **parallel hierarchical classification** using binary screening and multi-class diagnostic models with color-regional feature integration across 3 validated datasets.
 
 ## Enhanced Dual Architecture Framework
 
 ### **Binary Screening Model (Stage 1)**
-- **Purpose**: High-sensitivity pathology detection (Normal vs Pathological)
+- **Purpose**: High-sensitivity pathology detection with color and regional feature support
 - **Target Performance**: 98%+ sensitivity, 90%+ specificity
-- **Training Data**: Complete dataset (2,000+ images from all sources)
-- **Clinical Role**: Initial screening to catch all potential pathologies
+- **Training Data**: Complete dataset with color normalization and regional annotations
+- **Enhanced Features**: Color channel analysis, regional attention mechanisms
+- **Clinical Role**: Initial screening with anatomical region-specific alerts
 
 ### **Multi-Class Diagnostic Model (Stage 2)**
-- **Purpose**: Specific pathology identification among 8 pathological classes
+- **Purpose**: Specific pathology identification with color pattern matching and regional localization
 - **Target Performance**: 85%+ balanced accuracy, 80%+ sensitivity for rare classes
-- **Training Data**: Pathological cases only with aggressive augmentation
-- **Clinical Role**: Detailed diagnosis after positive screening
+- **Training Data**: Pathological cases with color-preserved augmentation and regional masks
+- **Enhanced Features**: Color histogram analysis, texture-color fusion, regional feature maps
+- **Clinical Role**: Detailed diagnosis with anatomical localization and color-based confidence
 
 ## Enhanced Stage-Based Dataset Architecture
 
@@ -37,12 +39,14 @@ This document outlines the enhanced stage-based training strategy for dual archi
 
 ## Enhanced Dual Architecture Training Strategy
 
-### Phase 1: Enhanced Data Isolation Setup for Dual Models
-- **Dual Model Data Routing**: Separate data preparation for binary screening (all data) vs multi-class diagnostic (pathological only)
-- **Enhanced Quality Control**: Medical-grade CLAHE preprocessing optimized for both models
-- **Multi-Scale Processing**: Preserve full resolution at 500×500 pixels with scale variants for dual architecture
-- **Enhanced Format Standardization**: Convert all images to unified PNG format optimized for dual model training
-- **Contamination Detection**: Implement dual model contamination detection to prevent data leakage
+### Phase 1: Enhanced Data Isolation Setup for Dual Models with Color-Regional Features
+- **Dual Model Data Routing**: Separate data preparation for binary screening (all data) vs multi-class diagnostic (pathological only) with color-regional annotation
+- **Enhanced Quality Control**: Medical-grade CLAHE preprocessing with LAB color space optimization for both models
+- **Color Feature Extraction Pipeline**: LAB color space processing with pathology-specific color pattern analysis
+- **Regional Analysis Framework**: Anatomical landmark detection with multi-scale regional feature extraction
+- **Multi-Scale Processing**: Preserve full resolution at 500×500 pixels with color preservation and regional annotation
+- **Enhanced Format Standardization**: Convert all images to unified PNG format with color consistency validation
+- **Contamination Detection**: Implement dual model contamination detection with color-regional validation to prevent data leakage
 
 ### Phase 2: Enhanced Class Mapping and Dual Architecture Standardization
 - **Binary Classification Mapping**: Normal vs Pathological categories for screening model
